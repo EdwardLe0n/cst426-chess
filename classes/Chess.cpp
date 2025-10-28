@@ -89,9 +89,65 @@ void Chess::FENtoBoard(const std::string& fen) {
             else {
 
                 bool is_black = false;
+                char piece = fen[i];
 
-                if (fen[i] >= 'a') {
+                if (piece >= 'a') {
                     is_black = true;
+                    std::cout << "found a black piece" << std::endl;
+                }
+
+                piece = std::tolower(piece);
+                Bit* somePiece = nullptr;
+
+                switch (piece)
+                {
+                case 'p':
+                    
+                    somePiece = PieceForPlayer(is_black, ChessPiece::Pawn);
+
+                    somePiece->setPosition(
+                        ImVec2(
+                            (float)(targetX * pieceSize) + (float)(pieceSize / 2), 
+                            (float)(targetY * pieceSize) + (float)(pieceSize / 2)
+                        )
+                    );
+
+                    _grid->getSquare(targetX, targetY)->setBit(somePiece);
+
+                    break;
+                
+                case 'r':
+                    
+                    somePiece = PieceForPlayer(is_black, ChessPiece::Rook);
+
+                    somePiece->setPosition(
+                        ImVec2(
+                            (float)(targetX * pieceSize) + (float)(pieceSize / 2), 
+                            (float)(targetY * pieceSize) + (float)(pieceSize / 2)
+                        )
+                    );
+
+                    _grid->getSquare(targetX, targetY)->setBit(somePiece);
+
+                    break;
+                
+                case 'b':
+                    
+                    somePiece = PieceForPlayer(is_black, ChessPiece::Bishop);
+
+                    somePiece->setPosition(
+                        ImVec2(
+                            (float)(targetX * pieceSize) + (float)(pieceSize / 2), 
+                            (float)(targetY * pieceSize) + (float)(pieceSize / 2)
+                        )
+                    );
+
+                    _grid->getSquare(targetX, targetY)->setBit(somePiece);
+
+                    break;
+
+                default:
+                    break;
                 }
 
                 targetX++;
