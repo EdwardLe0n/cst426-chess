@@ -1,6 +1,7 @@
 #include "Chess.h"
 #include <limits>
 #include <cmath>
+#include <iostream>
 
 Chess::Chess()
 {
@@ -55,6 +56,52 @@ void Chess::FENtoBoard(const std::string& fen) {
     // convert a FEN string to a board
     // FEN is a space delimited string with 6 fields
     // 1: piece placement (from white's perspective)
+
+    int targetX = 0;
+    int targetY = 0;
+
+    for (int i = 0; i < fen.length(); i++) {
+
+        // Extra info logic
+        if (targetX == 8 && targetY == 7) {
+
+        }
+        // main driver code for setting up the board
+        else {
+            
+            // If we've reached the end of this line, adjust info to go to the next one
+            if (fen[i] == '/') {
+                std::cout << "Going to next line" <<std::endl;
+                
+                targetX = 0;
+                targetY++;
+                
+                continue;
+            }
+
+            // if there's a number, adjust the target x location
+            if (fen[i] - '0' < 10) {
+                std::cout << "A number has been found" << std::endl;
+
+                targetX += fen[i] - '0';
+            }
+            // otherwise start handling piece placement
+            else {
+
+                bool is_black = false;
+
+                if (fen[i] >= 'a') {
+                    is_black = true;
+                }
+
+                targetX++;
+
+            }
+
+        }
+
+    }
+
     // NOT PART OF THIS ASSIGNMENT BUT OTHER THINGS THAT CAN BE IN A FEN STRING
     // ARE BELOW
     // 2: active color (W or B)
