@@ -145,6 +145,51 @@ void Chess::FENtoBoard(const std::string& fen) {
                     _grid->getSquare(targetX, targetY)->setBit(somePiece);
 
                     break;
+                
+                case 'k':
+                    
+                    somePiece = PieceForPlayer(is_black, ChessPiece::King);
+
+                    somePiece->setPosition(
+                        ImVec2(
+                            (float)(targetX * pieceSize) + (float)(pieceSize / 2), 
+                            (float)(targetY * pieceSize) + (float)(pieceSize / 2)
+                        )
+                    );
+
+                    _grid->getSquare(targetX, targetY)->setBit(somePiece);
+
+                    break;
+
+                case 'n':
+                    
+                    somePiece = PieceForPlayer(is_black, ChessPiece::Knight);
+
+                    somePiece->setPosition(
+                        ImVec2(
+                            (float)(targetX * pieceSize) + (float)(pieceSize / 2), 
+                            (float)(targetY * pieceSize) + (float)(pieceSize / 2)
+                        )
+                    );
+
+                    _grid->getSquare(targetX, targetY)->setBit(somePiece);
+
+                    break;
+
+                case 'q':
+                    
+                    somePiece = PieceForPlayer(is_black, ChessPiece::Queen);
+
+                    somePiece->setPosition(
+                        ImVec2(
+                            (float)(targetX * pieceSize) + (float)(pieceSize / 2), 
+                            (float)(targetY * pieceSize) + (float)(pieceSize / 2)
+                        )
+                    );
+
+                    _grid->getSquare(targetX, targetY)->setBit(somePiece);
+
+                    break;
 
                 default:
                     break;
