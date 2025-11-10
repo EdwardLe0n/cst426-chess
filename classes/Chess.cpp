@@ -22,7 +22,42 @@ void Chess::generateBitBoards() {
 
 void Chess::generateKnightBitBoards() {
 
-    
+    std::pair<int, int>offsets[] = {
+        {-2, -1}, {-1, -2}, {1, -2}, {2, -1},
+        {-2, 1}, {-1, 2}, {1, 2}, {2, 1}
+    };
+
+    for (int y = 0; y < 8; y++) {
+
+        for (int x = 0; x < 8; x++) {
+
+            knightBitBoards[(y * 8) + x] = 0;
+
+            // Sanity 
+            // int count = 0;
+
+            for (std::pair<int, int> someElement : offsets) {
+
+                if (x + someElement.first < 0 || x + someElement.first >= 8) {
+                    continue;
+                }
+
+                if (y + someElement.second < 0 || y + someElement.second >= 8) {
+                    continue;
+                }
+
+                knightBitBoards[(y * 8) + x] ^= (1 << (uint64_t)( (y + someElement.second) * 8 + (x + someElement.first) ) );
+                
+                // count++;
+
+            }
+
+            // Sanity 
+            // std::cout << "Added a total of " << count << " possible moves to this bit board" << std::endl;
+
+        }
+
+    }
 
 }
 
@@ -49,6 +84,8 @@ Bit* Chess::PieceForPlayer(const int playerNumber, ChessPiece piece)
     bit->LoadTextureFromFile(spritePath.c_str());
     bit->setOwner(getPlayerAt(playerNumber));
     bit->setSize(pieceSize, pieceSize);
+
+    std::cout << "testing game tag : " << bit->gameTag() << std::endl;
 
     return bit;
 }
