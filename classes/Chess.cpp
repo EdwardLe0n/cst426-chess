@@ -85,6 +85,7 @@ Bit* Chess::PieceForPlayer(const int playerNumber, ChessPiece piece)
     bit->setOwner(getPlayerAt(playerNumber));
     bit->setSize(pieceSize, pieceSize);
 
+    bit->setGameTag(piece);
     std::cout << "testing game tag : " << bit->gameTag() << std::endl;
 
     return bit;
@@ -277,7 +278,25 @@ bool Chess::canBitMoveFrom(Bit &bit, BitHolder &src)
 
 bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
 {
-    return true;
+
+    ChessPiece pieceType = (ChessPiece)bit.gameTag();
+
+    // get chess piece data from bitholder
+        
+    switch (pieceType) {
+
+        case ChessPiece::Knight:
+
+
+
+            break;
+
+        default: 
+            break;
+
+    }
+
+    return false;
 }
 
 void Chess::stopGame()
