@@ -5,6 +5,8 @@
 
 constexpr int pieceSize = 80;
 
+typedef uint64_t BitBoard;
+
 enum ChessPiece
 {
     NoPiece,
@@ -39,6 +41,10 @@ public:
 
     Grid* getGrid() override { return _grid; }
 
+    void generateBitBoards();
+
+    void generateKnightBitBoards();
+
 private:
     Bit* PieceForPlayer(const int playerNumber, ChessPiece piece);
     Player* ownerAt(int x, int y) const;
@@ -46,4 +52,6 @@ private:
     char pieceNotation(int x, int y) const;
 
     Grid* _grid;
+
+    BitBoard knightBitBoards[64];
 };

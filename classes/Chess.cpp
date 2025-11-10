@@ -6,11 +6,24 @@
 Chess::Chess()
 {
     _grid = new Grid(8, 8);
+    Chess::generateBitBoards();
 }
 
 Chess::~Chess()
 {
     delete _grid;
+}
+
+void Chess::generateBitBoards() {
+
+    Chess::generateKnightBitBoards();
+
+}
+
+void Chess::generateKnightBitBoards() {
+
+    
+
 }
 
 char Chess::pieceNotation(int x, int y) const
