@@ -46,8 +46,9 @@ void Chess::generateKnightBitBoards() {
                     continue;
                 }
 
-                knightBitBoards[(y * 8) + x] ^= (1 << (uint64_t)( (y + someElement.second) * 8 + (x + someElement.first) ) );
+                knightBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y + someElement.second) * 8 + (x + someElement.first) ) );
                 
+                // Sanity
                 // count++;
 
             }
@@ -86,7 +87,9 @@ Bit* Chess::PieceForPlayer(const int playerNumber, ChessPiece piece)
     bit->setSize(pieceSize, pieceSize);
 
     bit->setGameTag(piece);
-    std::cout << "testing game tag : " << bit->gameTag() << std::endl;
+
+    // Sanity
+    // std::cout << "testing game tag : " << bit->gameTag() << std::endl;
 
     return bit;
 }
@@ -132,7 +135,9 @@ void Chess::FENtoBoard(const std::string& fen) {
 
             // if there's a number, adjust the target x location
             if (fen[i] - '0' < 10) {
-                std::cout << "A number has been found" << std::endl;
+
+                // Sanity
+                // std::cout << "A number has been found" << std::endl;
 
                 targetX += fen[i] - '0';
             }
@@ -144,7 +149,9 @@ void Chess::FENtoBoard(const std::string& fen) {
 
                 if (piece >= 'a') {
                     is_black = true;
-                    std::cout << "found a black piece" << std::endl;
+                    
+                    // Sanity
+                    // std::cout << "found a black piece" << std::endl;
                 }
 
                 piece = std::tolower(piece);
@@ -279,17 +286,39 @@ bool Chess::canBitMoveFrom(Bit &bit, BitHolder &src)
 bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
 {
 
+    // First check if we can even move into the next space
+
+    if (dst.bit()) {
+        if (dst.bit()->getOwner() == src.bit()->getOwner()) {
+            return false;
+        }
+    }
+
     ChessPiece pieceType = (ChessPiece)bit.gameTag();
 
     // get chess piece data from bitholder
         
+    ChessSquare *from = (ChessSquare*)(&src);
+    std::pair<int, int> from_locat = {from->getColumn(), from->getRow()};
+
+    ChessSquare *to = (ChessSquare*)(&dst);
+    std::pair<int, int> to_locat = {to->getColumn(), to->getRow()};
+
     switch (pieceType) {
 
         case ChessPiece::Knight:
 
+            std::cout << "From at " << from_locat.first << ", " << from_locat.second << std::endl;
+            std::cout << "Looking at " << to_locat.first << ", " << to_locat.second << std::endl;
 
+            if ((knightBitBoards[(from_locat.first * 8) + from_locat.second] & (1ULL << (uint64_t)( (to_locat.first * 8) + to_locat.second))) != 0) {
 
-            break;
+                std::cout << "found a good space" << std::endl;
+
+                return true;
+            }
+
+        break;
 
         default: 
             break;
