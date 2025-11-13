@@ -45,6 +45,7 @@ public:
     void generateBitBoards();
 
     void generateKnightBitBoards();
+    void generateKingBitBoards();
 
 private:
     Bit* PieceForPlayer(const int playerNumber, ChessPiece piece);
@@ -55,4 +56,5 @@ private:
     Grid* _grid;
 
     BitBoard knightBitBoards[64];
+    BitBoard kingBitBoards[64];
 };

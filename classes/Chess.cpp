@@ -17,6 +17,41 @@ Chess::~Chess()
 void Chess::generateBitBoards() {
 
     Chess::generateKnightBitBoards();
+    Chess::generateKingBitBoards();
+
+}
+
+void Chess::generateKingBitBoards() {
+
+    std::pair<int, int>offsets[] = {
+        {-1, -1}, {0, -1}, {1, -1}, 
+        {-1, 0}, {1, 0}, 
+        {-1, 1}, {0, 1}, {1, 1}, 
+    };
+
+    for (int y = 0; y < 8; y++) {
+
+        for (int x = 0; x < 8; x++) {
+
+            kingBitBoards[(y * 8) + x] = 0;
+
+            for (std::pair<int, int> someElement : offsets) {
+
+                if (x + someElement.first < 0 || x + someElement.first >= 8) {
+                    continue;
+                }
+
+                if (y + someElement.second < 0 || y + someElement.second >= 8) {
+                    continue;
+                }
+
+                kingBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y + someElement.second) * 8 + (x + someElement.first) ) );
+
+            }
+
+        }
+
+    }
 
 }
 
@@ -33,9 +68,6 @@ void Chess::generateKnightBitBoards() {
 
             knightBitBoards[(y * 8) + x] = 0;
 
-            // Sanity 
-            // int count = 0;
-
             for (std::pair<int, int> someElement : offsets) {
 
                 if (x + someElement.first < 0 || x + someElement.first >= 8) {
@@ -47,14 +79,8 @@ void Chess::generateKnightBitBoards() {
                 }
 
                 knightBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y + someElement.second) * 8 + (x + someElement.first) ) );
-                
-                // Sanity
-                // count++;
 
             }
-
-            // Sanity 
-            // std::cout << "Added a total of " << count << " possible moves to this bit board" << std::endl;
 
         }
 
@@ -299,7 +325,7 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
     // get chess piece data from bitholder
         
     ChessSquare *from = (ChessSquare*)(&src);
-    std::pair<int, int> from_locat = {from->getColumn(), from->getRow()};
+    std::pair<int, int> from_locat = {from->getColumn(), 7 - from->getRow()};
 
     ChessSquare *to = (ChessSquare*)(&dst);
     std::pair<int, int> to_locat = {to->getColumn(), to->getRow()};
@@ -308,17 +334,21 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
 
         case ChessPiece::Knight:
 
-            std::cout << "From at " << from_locat.first << ", " << from_locat.second << std::endl;
-            std::cout << "Looking at " << to_locat.first << ", " << to_locat.second << std::endl;
-
-            if ((knightBitBoards[(from_locat.first * 8) + from_locat.second] & (1ULL << (uint64_t)( (to_locat.first * 8) + to_locat.second))) != 0) {
-
-                std::cout << "found a good space" << std::endl;
+            if ((knightBitBoards[(from_locat.second * 8) + from_locat.first] & (1ULL << (uint64_t)( (to_locat.second * 8) + to_locat.first))) != 0) {
 
                 return true;
             }
 
         break;
+
+        case ChessPiece::King:
+
+            if ((kingBitBoards[(from_locat.second * 8) + from_locat.first] & (1ULL << (uint64_t)( (to_locat.second * 8) + to_locat.first))) != 0) {
+
+                return true;
+            }
+
+            break;
 
         default: 
             break;
