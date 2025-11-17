@@ -87,6 +87,46 @@ void Chess::generateWhitePawnBitBoards() {
 
 void Chess::generateBlackPawnBitBoards() {
 
+    for (int y = 7; y > 1; y--) {
+
+        for (int x = 0; x < 8; x++) {
+        
+            blackPawnMoveBitBoards[(y * 8) + x] = 0;
+
+            blackPawnMoveBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y - 2) * 8 + x ) );
+
+            if (y == 7) {
+                blackPawnMoveBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y - 3) * 8 + x ) );
+            }
+
+            // Sanity
+            // Chess::printBitboard(blackPawnMoveBitBoards[(y * 8) + x]);
+
+        }
+
+    }
+
+    for (int y = 7; y > 1; y--) {
+
+        for (int x = 0; x < 8; x++) {
+        
+            blackPawnAttackBitBoards[(y * 8) + x] = 0;
+
+            if (x != 0) {
+                blackPawnAttackBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y - 2) * 8 + (x - 1) ) );
+            }
+
+            if (x != 7) {
+                blackPawnAttackBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y - 2) * 8 + (x + 1) ) );
+            }
+
+            // Sanity
+            // Chess::printBitboard(blackPawnAttackBitBoards[(y * 8) + x]);
+
+        }
+
+    }
+
 }
 
 void Chess::generateKingBitBoards() {
@@ -487,7 +527,56 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
             // Black pawn code
             else {
 
+                // first, check move
+                if (
+                    ( ( blackPawnMoveBitBoards[from_index]
+                    & (1ULL << (uint64_t)(to_index)) )
+                    & ( ~( friendly | Chess::whiteOccupancy() ) ) ) != 0
+                ) {
 
+                    if ((to_index / 8) - 1 != (from_index / 8)) {
+                        return true;
+                    }
+                    else {
+
+                        if (
+                            ( ( blackPawnMoveBitBoards[from_index]
+                            & (1ULL << (uint64_t)(to_index + 8)) )
+                            & ( ~( friendly | Chess::whiteOccupancy() ) ) ) != 0
+                        ) {
+
+                            return true;
+
+                        }
+                        else {
+
+                            return false;
+
+                        }
+
+                    }
+
+                }
+                // then check attack
+
+                else {
+
+                    if (
+                        ( ( blackPawnAttackBitBoards[from_index]
+                        & (1ULL << (uint64_t)(to_index)) )
+                        & ( ~( friendly | Chess::whiteOccupancy() ) ) ) != 0
+                    ) {
+
+                        return true;
+
+                    }
+                    else {
+
+                        return false;
+
+                    }
+
+                }
 
             }
 
