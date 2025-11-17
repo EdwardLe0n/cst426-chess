@@ -425,6 +425,9 @@ bool Chess::canBitMoveFrom(Bit &bit, BitHolder &src)
     // need to implement friendly/unfriendly in bit so for now this hack
     int currentPlayer = getCurrentPlayer()->playerNumber() * 128;
     int pieceColor = bit.gameTag() & 128;
+
+    std::cout << "check" << std::endl;
+
     if (pieceColor == currentPlayer) return true;
     return false;
 }
@@ -478,7 +481,7 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
                     & ( ~( friendly | Chess::blackOccupancy() ) ) ) != 0
                 ) {
 
-                    if ((to_index / 8) - 1 != (from_index / 8)) {
+                    if ((to_index / 8) - 1 == (from_index / 8)) {
                         return true;
                     }
                     else {
@@ -508,7 +511,7 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
                     if (
                         ( ( whitePawnAttackBitBoards[from_index]
                         & (1ULL << (uint64_t)(to_index)) )
-                        & ( ~( friendly | Chess::blackOccupancy() ) ) ) != 0
+                        & ( Chess::blackOccupancy() ) ) != 0
                     ) {
 
                         return true;
@@ -534,7 +537,7 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
                     & ( ~( friendly | Chess::whiteOccupancy() ) ) ) != 0
                 ) {
 
-                    if ((to_index / 8) - 1 != (from_index / 8)) {
+                    if ((to_index / 8) - 1 == (from_index / 8)) {
                         return true;
                     }
                     else {
@@ -564,7 +567,7 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
                     if (
                         ( ( blackPawnAttackBitBoards[from_index]
                         & (1ULL << (uint64_t)(to_index)) )
-                        & ( ~( friendly | Chess::whiteOccupancy() ) ) ) != 0
+                        & ( Chess::whiteOccupancy() ) ) != 0
                     ) {
 
                         return true;
