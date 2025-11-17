@@ -15,9 +15,10 @@ Chess::~Chess()
 
 void Chess::generateBitBoards() {
 
+    Chess::generatePawnBitBoards();
+
     Chess::generateKnightBitBoards();
     Chess::generateKingBitBoards();
-
 
     // Sanity
 
@@ -32,6 +33,59 @@ void Chess::generateBitBoards() {
     // std::cout << "All occupancy" << std::endl;
 
     // Chess::printBitboard(Chess::whiteOccupancy() | Chess::blackOccupancy());
+
+}
+
+void Chess::generatePawnBitBoards() {
+    Chess::generateWhitePawnBitBoards();
+    Chess::generateBlackPawnBitBoards();
+}
+
+void Chess::generateWhitePawnBitBoards() {
+
+    for (int y = 1; y < 7; y++) {
+
+        for (int x = 0; x < 8; x++) {
+        
+            whitePawnMoveBitBoards[(y * 8) + x] = 0;
+
+            whitePawnMoveBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y + 1) * 8 + x ) );
+
+            if (y == 1) {
+                whitePawnMoveBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y + 2) * 8 + x ) );
+            }
+
+            // Sanity
+            // Chess::printBitboard(whitePawnMoveBitBoards[(y * 8) + x]);
+
+        }
+
+    }
+
+    for (int y = 1; y < 7; y++) {
+
+        for (int x = 0; x < 8; x++) {
+        
+            whitePawnAttackBitBoards[(y * 8) + x] = 0;
+
+            if (x != 0) {
+                whitePawnAttackBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y + 1) * 8 + (x - 1) ) );
+            }
+
+            if (x != 7) {
+                whitePawnAttackBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y + 1) * 8 + (x + 1) ) );
+            }
+
+            // Sanity
+            // Chess::printBitboard(whitePawnAttackBitBoards[(y * 8) + x]);
+
+        }
+
+    }
+
+}
+
+void Chess::generateBlackPawnBitBoards() {
 
 }
 
@@ -63,6 +117,7 @@ void Chess::generateKingBitBoards() {
 
             }
 
+            // Sanity
             // Chess::printBitboard(kingBitBoards[(y * 8) + x]);
 
         }
@@ -98,7 +153,8 @@ void Chess::generateKnightBitBoards() {
 
             }
 
-            Chess::printBitboard(knightBitBoards[(y * 8) + x]);
+            // Sanity
+            // Chess::printBitboard(knightBitBoards[(y * 8) + x]);
 
         }
 
@@ -372,13 +428,74 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
 
         case ChessPiece::Pawn: 
 
-            
+            // White pawn code
+            if (currentPlayer->playerNumber() == 0) {
+
+                // first, check move
+                if (
+                    ( ( whitePawnMoveBitBoards[from_index]
+                    & (1ULL << (uint64_t)(to_index)) )
+                    & ( ~( friendly | Chess::blackOccupancy() ) ) ) != 0
+                ) {
+
+                    if ((to_index / 8) - 1 != (from_index / 8)) {
+                        return true;
+                    }
+                    else {
+
+                        if (
+                            ( ( whitePawnMoveBitBoards[from_index]
+                            & (1ULL << (uint64_t)(to_index - 8)) )
+                            & ( ~( friendly | Chess::blackOccupancy() ) ) ) != 0
+                        ) {
+
+                            return true;
+
+                        }
+                        else {
+
+                            return false;
+
+                        }
+
+                    }
+
+                }
+                // then check attack
+
+                else {
+
+                    if (
+                        ( ( whitePawnAttackBitBoards[from_index]
+                        & (1ULL << (uint64_t)(to_index)) )
+                        & ( ~( friendly | Chess::blackOccupancy() ) ) ) != 0
+                    ) {
+
+                        return true;
+
+                    }
+                    else {
+
+                        return false;
+
+                    }
+
+                }
+
+            }
+
+            // Black pawn code
+            else {
+
+
+
+            }
 
             break;
 
         case ChessPiece::Knight:
 
-            if ((knightBitBoards[from_index] & (1ULL << (uint64_t)(to_index)) & !friendly) != 0) {
+            if ((knightBitBoards[from_index] & (1ULL << (uint64_t)(to_index)) & ~friendly) != 0) {
 
                 return true;
             }
@@ -387,7 +504,7 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
 
         case ChessPiece::King:
 
-            if ((kingBitBoards[from_index] & (1ULL << (uint64_t)(to_index)) & !friendly) != 0) {
+            if ((kingBitBoards[from_index] & (1ULL << (uint64_t)(to_index)) & ~friendly) != 0) {
 
                 return true;
             }

@@ -47,6 +47,10 @@ public:
     void generateKnightBitBoards();
     void generateKingBitBoards();
 
+    void generatePawnBitBoards();
+    void generateWhitePawnBitBoards();
+    void generateBlackPawnBitBoards();
+
     void printBitboard(uint64_t some_board);
 
     uint64_t whiteOccupancy();
@@ -64,7 +68,9 @@ private:
     BitBoard kingBitBoards[64];
 
     BitBoard whitePawnMoveBitBoards[64];
+    BitBoard whitePawnAttackBitBoards[64];
 
     BitBoard blackPawnMoveBitBoards[64];
+    BitBoard blackPawnAttackBitBoards[64];
     
 };
