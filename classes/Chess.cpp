@@ -6,7 +6,6 @@
 Chess::Chess()
 {
     _grid = new Grid(8, 8);
-    Chess::generateBitBoards();
 }
 
 Chess::~Chess()
@@ -18,6 +17,21 @@ void Chess::generateBitBoards() {
 
     Chess::generateKnightBitBoards();
     Chess::generateKingBitBoards();
+
+
+    // Sanity
+
+    // std::cout << "White occupancy" << std::endl;
+
+    // Chess::printBitboard(Chess::whiteOccupancy());
+
+    // std::cout << "Black occupancy" << std::endl;
+
+    // Chess::printBitboard(Chess::blackOccupancy());
+
+    // std::cout << "All occupancy" << std::endl;
+
+    // Chess::printBitboard(Chess::whiteOccupancy() | Chess::blackOccupancy());
 
 }
 
@@ -48,6 +62,8 @@ void Chess::generateKingBitBoards() {
                 kingBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y + someElement.second) * 8 + (x + someElement.first) ) );
 
             }
+
+            // Chess::printBitboard(kingBitBoards[(y * 8) + x]);
 
         }
 
@@ -82,6 +98,8 @@ void Chess::generateKnightBitBoards() {
 
             }
 
+            Chess::printBitboard(knightBitBoards[(y * 8) + x]);
+
         }
 
     }
@@ -112,7 +130,11 @@ Bit* Chess::PieceForPlayer(const int playerNumber, ChessPiece piece)
     bit->setOwner(getPlayerAt(playerNumber));
     bit->setSize(pieceSize, pieceSize);
 
-    bit->setGameTag(piece);
+    int to_add = playerNumber == 1 ? 128 : 0;
+
+    to_add += piece;
+
+    bit->setGameTag(to_add);
 
     // Sanity
     // std::cout << "testing game tag : " << bit->gameTag() << std::endl;
@@ -128,6 +150,8 @@ void Chess::setUpBoard()
 
     _grid->initializeChessSquares(pieceSize, "boardsquare.png");
     FENtoBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+
+    Chess::generateBitBoards();
 
     startGame();
 }
@@ -320,7 +344,7 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
         }
     }
 
-    ChessPiece pieceType = (ChessPiece)bit.gameTag();
+    ChessPiece pieceType = (ChessPiece)(bit.gameTag() < 128 ? bit.gameTag() : bit.gameTag() - 128);
 
     // get chess piece data from bitholder
         
@@ -330,11 +354,31 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
     ChessSquare *to = (ChessSquare*)(&dst);
     std::pair<int, int> to_locat = {to->getColumn(), to->getRow()};
 
+    Player* currentPlayer = Game::getCurrentPlayer();
+
+    uint64_t friendly = 0;
+
+    if (currentPlayer->playerNumber() == 0) {
+        friendly = Chess::whiteOccupancy();
+    }
+    else {
+        friendly = Chess::blackOccupancy();
+    }
+
+    int from_index = (from_locat.second * 8) + from_locat.first;
+    int to_index = (to_locat.second * 8) + to_locat.first;
+
     switch (pieceType) {
+
+        case ChessPiece::Pawn: 
+
+            
+
+            break;
 
         case ChessPiece::Knight:
 
-            if ((knightBitBoards[(from_locat.second * 8) + from_locat.first] & (1ULL << (uint64_t)( (to_locat.second * 8) + to_locat.first))) != 0) {
+            if ((knightBitBoards[from_index] & (1ULL << (uint64_t)(to_index)) & !friendly) != 0) {
 
                 return true;
             }
@@ -343,7 +387,7 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
 
         case ChessPiece::King:
 
-            if ((kingBitBoards[(from_locat.second * 8) + from_locat.first] & (1ULL << (uint64_t)( (to_locat.second * 8) + to_locat.first))) != 0) {
+            if ((kingBitBoards[from_index] & (1ULL << (uint64_t)(to_index)) & !friendly) != 0) {
 
                 return true;
             }
@@ -401,7 +445,52 @@ std::string Chess::stateString()
             s += pieceNotation( x, y );
         }
     );
-    return s;}
+    return s;
+}
+
+uint64_t Chess::whiteOccupancy()
+{
+    uint64_t to_return = 0;
+
+    _grid->forEachSquare([&](ChessSquare* square, int x, int y) {
+
+            if (square->bit()) {
+
+                if (square->bit()->gameTag() < 128) {
+
+                    to_return = to_return | (1ULL << (y * 8 + x));
+
+                }
+
+            }
+
+        }
+    );
+
+    return to_return;
+}
+
+uint64_t Chess::blackOccupancy()
+{
+    uint64_t to_return = 0;
+
+    _grid->forEachSquare([&](ChessSquare* square, int x, int y) {
+
+            if (square->bit()) {
+
+                if (square->bit()->gameTag() > 128) {
+
+                    to_return = to_return | (1ULL << (y * 8 + x));
+
+                }
+
+            }
+
+        }
+    );
+
+    return to_return;
+}
 
 void Chess::setStateString(const std::string &s)
 {
@@ -414,4 +503,24 @@ void Chess::setStateString(const std::string &s)
             square->setBit(nullptr);
         }
     });
+}
+
+
+void Chess::printBitboard(uint64_t some_board) {
+    std::cout << "\n  a b c d e f g h\n";
+    for (int rank = 7; rank >= 0; rank--) {
+        std::cout << (rank + 1) << " ";
+        for (int file = 0; file < 8; file++) {
+            int square = rank * 8 + file;
+            if (some_board & (1ULL << square)) {
+                std::cout << "X ";
+            } else {
+                std::cout << ". ";
+            }
+        }
+        std::cout << (rank + 1) << "\n";
+        std::cout << std::flush;
+    }
+    std::cout << "  a b c d e f g h\n";
+    std::cout << std::flush;
 }

@@ -47,6 +47,11 @@ public:
     void generateKnightBitBoards();
     void generateKingBitBoards();
 
+    void printBitboard(uint64_t some_board);
+
+    uint64_t whiteOccupancy();
+    uint64_t blackOccupancy();
+
 private:
     Bit* PieceForPlayer(const int playerNumber, ChessPiece piece);
     Player* ownerAt(int x, int y) const;
@@ -57,4 +62,9 @@ private:
 
     BitBoard knightBitBoards[64];
     BitBoard kingBitBoards[64];
+
+    BitBoard whitePawnMoveBitBoards[64];
+
+    BitBoard blackPawnMoveBitBoards[64];
+    
 };
