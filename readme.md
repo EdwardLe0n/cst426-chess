@@ -1,13 +1,22 @@
-Fork or clone your this chess project into a new GitHub repository.
+# The Chess Assignment(s)
 
-Add support for FEN stringsLinks to an external site. to your game setup so that instead of the current way you are setting up your game board you are setting it up with a call similar to the following call.
+## Directory
 
-FENtoBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+- [Setting up the Chess Board](#chess-board-instantiation)
+- [Moving Some Pieces](#chess-movement---part-1)
 
-Your routine should be able to take just the board position portion of a FEN string, or the entire FEN string like so:
+## Chess Board Instantiation
 
-FENtoBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+Whilst a read me wasn't necessarily required for this segment, I felt that it's be nice to look back on it and reflect on some of the initial work.
 
-(you can ignore the end for now)
+Looking back, I quite enjoyed my methodology of tackling what needed to be done in the given order, which was:
 
-This will allow you to quickly check that your castling, promotion and en passant code is working.
+1. Parse through the given FEN string without storing any date
+2. Bring in pieces piece by piece
+3. Tie in the Chess Piece enum
+4. Bring in all the pieces
+
+By grouping up what needed to be done in thus ---
+
+## Chess Movement - Part 1
+
