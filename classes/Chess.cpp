@@ -258,7 +258,9 @@ void Chess::FENtoBoard(const std::string& fen) {
             
             // If we've reached the end of this line, adjust info to go to the next one
             if (fen[i] == '/') {
-                std::cout << "Going to next line" <<std::endl;
+                
+                // Sanity
+                // std::cout << "Going to next line" <<std::endl;
                 
                 targetX = 0;
                 targetY++;
@@ -288,7 +290,7 @@ void Chess::FENtoBoard(const std::string& fen) {
                 }
 
                 piece = std::tolower(piece);
-                Bit* somePiece = nullptr;
+                Bit* somePiece;
 
                 switch (piece)
                 {
@@ -296,29 +298,11 @@ void Chess::FENtoBoard(const std::string& fen) {
                     
                     somePiece = PieceForPlayer(is_black, ChessPiece::Pawn);
 
-                    somePiece->setPosition(
-                        ImVec2(
-                            (float)(targetX * pieceSize) + (float)(pieceSize / 2), 
-                            (float)(targetY * pieceSize) + (float)(pieceSize / 2)
-                        )
-                    );
-
-                    _grid->getSquare(targetX, targetY)->setBit(somePiece);
-
                     break;
                 
                 case 'r':
                     
                     somePiece = PieceForPlayer(is_black, ChessPiece::Rook);
-
-                    somePiece->setPosition(
-                        ImVec2(
-                            (float)(targetX * pieceSize) + (float)(pieceSize / 2), 
-                            (float)(targetY * pieceSize) + (float)(pieceSize / 2)
-                        )
-                    );
-
-                    _grid->getSquare(targetX, targetY)->setBit(somePiece);
 
                     break;
                 
@@ -326,29 +310,11 @@ void Chess::FENtoBoard(const std::string& fen) {
                     
                     somePiece = PieceForPlayer(is_black, ChessPiece::Bishop);
 
-                    somePiece->setPosition(
-                        ImVec2(
-                            (float)(targetX * pieceSize) + (float)(pieceSize / 2), 
-                            (float)(targetY * pieceSize) + (float)(pieceSize / 2)
-                        )
-                    );
-
-                    _grid->getSquare(targetX, targetY)->setBit(somePiece);
-
                     break;
                 
                 case 'k':
                     
                     somePiece = PieceForPlayer(is_black, ChessPiece::King);
-
-                    somePiece->setPosition(
-                        ImVec2(
-                            (float)(targetX * pieceSize) + (float)(pieceSize / 2), 
-                            (float)(targetY * pieceSize) + (float)(pieceSize / 2)
-                        )
-                    );
-
-                    _grid->getSquare(targetX, targetY)->setBit(somePiece);
 
                     break;
 
@@ -356,35 +322,26 @@ void Chess::FENtoBoard(const std::string& fen) {
                     
                     somePiece = PieceForPlayer(is_black, ChessPiece::Knight);
 
-                    somePiece->setPosition(
-                        ImVec2(
-                            (float)(targetX * pieceSize) + (float)(pieceSize / 2), 
-                            (float)(targetY * pieceSize) + (float)(pieceSize / 2)
-                        )
-                    );
-
-                    _grid->getSquare(targetX, targetY)->setBit(somePiece);
-
                     break;
 
                 case 'q':
                     
                     somePiece = PieceForPlayer(is_black, ChessPiece::Queen);
 
-                    somePiece->setPosition(
-                        ImVec2(
-                            (float)(targetX * pieceSize) + (float)(pieceSize / 2), 
-                            (float)(targetY * pieceSize) + (float)(pieceSize / 2)
-                        )
-                    );
-
-                    _grid->getSquare(targetX, targetY)->setBit(somePiece);
-
                     break;
 
                 default:
                     break;
                 }
+
+                somePiece->setPosition(
+                    ImVec2(
+                        (float)(targetX * pieceSize) + (float)(pieceSize / 2), 
+                        (float)(targetY * pieceSize) + (float)(pieceSize / 2)
+                    )
+                );
+
+                _grid->getSquare(targetX, targetY)->setBit(somePiece);
 
                 targetX++;
 
