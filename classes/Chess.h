@@ -29,6 +29,9 @@ public:
 
     bool canBitMoveFrom(Bit &bit, BitHolder &src) override;
     bool canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst) override;
+
+    virtual void bitMovedFromTo(Bit &bit, BitHolder &src, BitHolder &dst) override;
+
     bool actionForEmptyHolder(BitHolder &holder) override;
 
     void stopGame() override;
@@ -72,5 +75,7 @@ private:
 
     BitBoard blackPawnMoveBitBoards[64];
     BitBoard blackPawnAttackBitBoards[64];
+
+    bool _isWhitePlaying;
     
 };

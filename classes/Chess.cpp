@@ -20,20 +20,6 @@ void Chess::generateBitBoards() {
     Chess::generateKnightBitBoards();
     Chess::generateKingBitBoards();
 
-    // Sanity
-
-    // std::cout << "White occupancy" << std::endl;
-
-    // Chess::printBitboard(Chess::whiteOccupancy());
-
-    // std::cout << "Black occupancy" << std::endl;
-
-    // Chess::printBitboard(Chess::blackOccupancy());
-
-    // std::cout << "All occupancy" << std::endl;
-
-    // Chess::printBitboard(Chess::whiteOccupancy() | Chess::blackOccupancy());
-
 }
 
 void Chess::generatePawnBitBoards() {
@@ -248,6 +234,7 @@ void Chess::setUpBoard()
     FENtoBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
 
     Chess::generateBitBoards();
+    _isWhitePlaying = true;
 
     startGame();
 }
@@ -428,30 +415,42 @@ bool Chess::canBitMoveFrom(Bit &bit, BitHolder &src)
 
     std::cout << "check" << std::endl;
 
+    std::cout << "comparing " << currentPlayer << " and " << pieceColor << std::endl;
+
     if (pieceColor == currentPlayer) return true;
     return false;
+}
+
+void Chess::bitMovedFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
+{
+
+    // if (Chess::canBitMoveFromTo())
+
+	endTurn();
+    // _gameOptions.currentTurnNo += 1;
+
 }
 
 bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
 {
 
-    // First check if we can even move into the next space
-
-    if (dst.bit()) {
-        if (dst.bit()->getOwner() == src.bit()->getOwner()) {
-            return false;
-        }
-    }
+    // if (src.bit()->getOwner()->playerNumber() != (_isWhitePlaying ? 0 : 1)) {
+    //     return false;
+    // }
 
     ChessPiece pieceType = (ChessPiece)(bit.gameTag() < 128 ? bit.gameTag() : bit.gameTag() - 128);
 
     // get chess piece data from bitholder
         
     ChessSquare *from = (ChessSquare*)(&src);
-    std::pair<int, int> from_locat = {from->getColumn(), 7 - from->getRow()};
+
+    std::pair<int, int> from_locat = {from->getColumn(), from->getRow()};
 
     ChessSquare *to = (ChessSquare*)(&dst);
-    std::pair<int, int> to_locat = {to->getColumn(), to->getRow()};
+    std::pair<int, int> to_locat = {to->getColumn(), 7 - to->getRow()};
+
+    // std::cout << "From : " << from_locat.first << ", " << from_locat.second << std::endl;
+    // std::cout << "To : " << to_locat.first << ", " << to_locat.second << std::endl;
 
     Player* currentPlayer = Game::getCurrentPlayer();
 
@@ -466,6 +465,8 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
 
     int from_index = (from_locat.second * 8) + from_locat.first;
     int to_index = (to_locat.second * 8) + to_locat.first;
+
+    // std::cout << 
 
     switch (pieceType) {
 
