@@ -73,37 +73,37 @@ void Chess::generateWhitePawnBitBoards() {
 
 void Chess::generateBlackPawnBitBoards() {
 
-    for (int y = 7; y > 1; y--) {
+    for (int y = 6; y > 0; y--) {
 
         for (int x = 0; x < 8; x++) {
         
             blackPawnMoveBitBoards[(y * 8) + x] = 0;
 
-            blackPawnMoveBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y - 2) * 8 + x ) );
+            blackPawnMoveBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y - 1) * 8 + x ) );
 
-            if (y == 7) {
-                blackPawnMoveBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y - 3) * 8 + x ) );
+            if (y == 6) {
+                blackPawnMoveBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y - 2) * 8 + x ) );
             }
 
             // Sanity
-            // Chess::printBitboard(blackPawnMoveBitBoards[(y * 8) + x]);
+            Chess::printBitboard(blackPawnMoveBitBoards[(y * 8) + x]);
 
         }
 
     }
 
-    for (int y = 7; y > 1; y--) {
+    for (int y = 6; y > 0; y--) {
 
         for (int x = 0; x < 8; x++) {
         
             blackPawnAttackBitBoards[(y * 8) + x] = 0;
 
             if (x != 0) {
-                blackPawnAttackBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y - 2) * 8 + (x - 1) ) );
+                blackPawnAttackBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y - 1) * 8 + (x - 1) ) );
             }
 
             if (x != 7) {
-                blackPawnAttackBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y - 2) * 8 + (x + 1) ) );
+                blackPawnAttackBitBoards[(y * 8) + x] ^= (1ULL << (uint64_t)( (y - 1) * 8 + (x + 1) ) );
             }
 
             // Sanity
@@ -374,9 +374,9 @@ bool Chess::canBitMoveFrom(Bit &bit, BitHolder &src)
     int currentPlayer = getCurrentPlayer()->playerNumber() * 128;
     int pieceColor = bit.gameTag() & 128;
 
-    std::cout << "check" << std::endl;
-
-    std::cout << "comparing " << currentPlayer << " and " << pieceColor << std::endl;
+    // Sanity
+    // std::cout << "check" << std::endl;
+    // std::cout << "comparing " << currentPlayer << " and " << pieceColor << std::endl;
 
     if (pieceColor == currentPlayer) return true;
     return false;
@@ -399,8 +399,6 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
     //     return false;
     // }
 
-    std::cout << "trying to pick up" << std::endl; 
-
     ChessPiece pieceType = (ChessPiece)(bit.gameTag() < 128 ? bit.gameTag() : bit.gameTag() - 128);
 
     // get chess piece data from bitholder
@@ -413,8 +411,8 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
     std::pair<int, int> to_locat = {to->getColumn(), to->getRow()};
     // std::pair<int, int> to_locat = {to->getColumn(), to->getRow() - 7};
 
-    std::cout << "From : " << from_locat.first << ", " << from_locat.second << std::endl;
-    std::cout << "To : " << to_locat.first << ", " << to_locat.second << std::endl;
+    // std::cout << "From : " << from_locat.first << ", " << from_locat.second << std::endl;
+    // std::cout << "To : " << to_locat.first << ", " << to_locat.second << std::endl;
 
     Player* currentPlayer = Game::getCurrentPlayer();
 
@@ -502,7 +500,7 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
                     & ( ~( friendly | Chess::whiteOccupancy() ) ) ) != 0
                 ) {
 
-                    if ((to_index / 8) - 1 == (from_index / 8)) {
+                    if ((to_index / 8) + 1 == (from_index / 8)) {
                         return true;
                     }
                     else {

@@ -2,22 +2,11 @@
 
 #include "Game.h"
 #include "Grid.h"
-// #include "Bitboard.h"
+#include "Bitboard.h"
 
 constexpr int pieceSize = 80;
 
 typedef uint64_t BitBoard;
-
-enum ChessPiece
-{
-    NoPiece,
-    Pawn,
-    Knight,
-    Bishop,
-    Rook,
-    Queen,
-    King
-};
 
 class Chess : public Game
 {
@@ -68,6 +57,7 @@ private:
     Grid* _grid;
 
     BitBoard knightBitBoards[64];
+    
     BitBoard kingBitBoards[64];
 
     BitBoard whitePawnMoveBitBoards[64];
