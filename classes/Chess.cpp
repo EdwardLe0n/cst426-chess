@@ -245,12 +245,12 @@ void Chess::FENtoBoard(const std::string& fen) {
     // 1: piece placement (from white's perspective)
 
     int targetX = 0;
-    int targetY = 0;
+    int targetY = 7;
 
     for (int i = 0; i < fen.length(); i++) {
 
         // Extra info logic
-        if (targetX == 8 && targetY == 7) {
+        if (targetX == 8 && targetY == -1) {
 
         }
         // main driver code for setting up the board
@@ -263,7 +263,7 @@ void Chess::FENtoBoard(const std::string& fen) {
                 // std::cout << "Going to next line" <<std::endl;
                 
                 targetX = 0;
-                targetY++;
+                targetY--;
                 
                 continue;
             }
@@ -334,14 +334,18 @@ void Chess::FENtoBoard(const std::string& fen) {
                     break;
                 }
 
-                somePiece->setPosition(
-                    ImVec2(
-                        (float)(targetX * pieceSize) + (float)(pieceSize / 2), 
-                        (float)(targetY * pieceSize) + (float)(pieceSize / 2)
-                    )
-                );
+                // somePiece->setPosition(
+                //     ImVec2(
+                //         (float)(targetX * pieceSize) + (float)(pieceSize / 2), 
+                //         (float)((targetY - 7) * pieceSize) + (float)(pieceSize / 2)
+                //     )
+                // );
 
-                _grid->getSquare(targetX, targetY)->setBit(somePiece);
+                ChessSquare* some_square =  _grid->getSquare(targetX, targetY);
+                
+                somePiece->setPosition(some_square->getPosition());
+
+                some_square->setBit(somePiece);
 
                 targetX++;
 
@@ -395,6 +399,8 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
     //     return false;
     // }
 
+    std::cout << "trying to pick up" << std::endl; 
+
     ChessPiece pieceType = (ChessPiece)(bit.gameTag() < 128 ? bit.gameTag() : bit.gameTag() - 128);
 
     // get chess piece data from bitholder
@@ -404,10 +410,11 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
     std::pair<int, int> from_locat = {from->getColumn(), from->getRow()};
 
     ChessSquare *to = (ChessSquare*)(&dst);
-    std::pair<int, int> to_locat = {to->getColumn(), 7 - to->getRow()};
+    std::pair<int, int> to_locat = {to->getColumn(), to->getRow()};
+    // std::pair<int, int> to_locat = {to->getColumn(), to->getRow() - 7};
 
-    // std::cout << "From : " << from_locat.first << ", " << from_locat.second << std::endl;
-    // std::cout << "To : " << to_locat.first << ", " << to_locat.second << std::endl;
+    std::cout << "From : " << from_locat.first << ", " << from_locat.second << std::endl;
+    std::cout << "To : " << to_locat.first << ", " << to_locat.second << std::endl;
 
     Player* currentPlayer = Game::getCurrentPlayer();
 
