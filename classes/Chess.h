@@ -45,6 +45,12 @@ public:
 
     void printBitboard(uint64_t some_board);
 
+    void updateAI();
+    int negamax();
+    
+    int evaluateBoard(const std::string &state);
+    std::vector<BitMove> generateAllMoves();
+
     uint64_t whiteOccupancy();
     uint64_t blackOccupancy();
 
@@ -57,7 +63,7 @@ private:
     Grid* _grid;
 
     BitBoard knightBitBoards[64];
-    
+
     BitBoard kingBitBoards[64];
 
     BitBoard whitePawnMoveBitBoards[64];
@@ -67,5 +73,7 @@ private:
     BitBoard blackPawnAttackBitBoards[64];
 
     bool _isWhitePlaying;
+
+    std::vector<BitMove> moves;
     
 };

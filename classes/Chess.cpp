@@ -696,3 +696,90 @@ void Chess::printBitboard(uint64_t some_board) {
     std::cout << "  a b c d e f g h\n";
     std::cout << std::flush;
 }
+
+void Chess::updateAI() {
+
+    
+
+    // BitMove
+
+    // if (bestMove)
+
+}
+
+int Chess::negamax() {
+
+    // int score = checkForAIWinner(state, _gameOptions, playerColor);
+
+    // if (score) {
+
+    //     // a winning state here is a loss for the recursive parent
+    //     return -score;
+
+    // }
+
+    // int bestVal = -10000;
+
+    // for (int i = 0; i < _gameOptions.rowX; i++) {
+
+    //     int currentLocat = orderedSort[i];
+    //     int nextLocat = currentLocat + _gameOptions.rowX;
+
+    //     if(state[currentLocat] == '-') {
+
+    //         // needs to check the lowest location
+
+    //         while(!((nextLocat / _gameOptions.rowX) >= _gameOptions.rowY) && state[currentLocat] == '-'){
+
+    //             if (state[nextLocat] != '-') {
+    //                 break;
+    //             }
+
+    //             currentLocat = nextLocat;
+    //             nextLocat += _gameOptions.rowX;
+
+    //         }
+
+    //         // add weight here
+
+    //         // std::cout << "running into depth" << std::endl;
+
+    //         bestVal = std::max(bestVal, WEIGHT_TABLE[currentLocat / _gameOptions.rowX][currentLocat % _gameOptions.rowX]);
+
+    //     }
+
+    // }
+
+    return 0;
+
+}
+
+int Chess::evaluateBoard(const std::string &state) {
+
+    int boardValues[128];
+
+    // boardValues['P'] = ;
+    // boardValues['N'] = ;
+    // boardValues['B'] = ;
+    // boardValues['R'] = ;
+    // boardValues['Q'] = ;
+    // boardValues['K'] = ;
+    // boardValues['p'] = ;
+    // boardValues['n'] = ;
+    // boardValues['b'] = ;
+    // boardValues['r'] = ;
+    // boardValues['q'] = ;
+    // boardValues['k'] = ;
+    // boardValues['k'] = 0;
+
+    return 0;
+
+}
+
+std::vector<BitMove> Chess::generateAllMoves() {
+
+    std::vector<BitMove> moveList;
+
+    return moveList;
+
+}
