@@ -38,10 +38,12 @@ public:
 
     void generateKnightBitBoards();
     void generateKingBitBoards();
-
     void generatePawnBitBoards();
     void generateWhitePawnBitBoards();
     void generateBlackPawnBitBoards();
+
+    void generateBitBoards(int target);
+    void generateKnightBitBoards(int target);
 
     void printBitboard(uint64_t some_board);
 

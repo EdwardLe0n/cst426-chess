@@ -22,6 +22,14 @@ void Chess::generateBitBoards() {
 
 }
 
+void Chess::generateBitBoards(int target) {
+
+    // Add logic to only do it based on the player playing
+
+    Chess::generateKnightBitBoards(target);
+
+}
+
 void Chess::generatePawnBitBoards() {
     Chess::generateWhitePawnBitBoards();
     Chess::generateBlackPawnBitBoards();
@@ -183,6 +191,31 @@ void Chess::generateKnightBitBoards() {
             // Chess::printBitboard(knightBitBoards[(y * 8) + x]);
 
         }
+
+    }
+
+}
+
+void Chess::generateKnightBitBoards(int target) {
+
+    std::pair<int, int>offsets[] = {
+        {-2, -1}, {-1, -2}, {1, -2}, {2, -1},
+        {-2, 1}, {-1, 2}, {1, 2}, {2, 1}
+    };
+
+    for (std::pair<int, int> someElement : offsets) {
+
+        if (target + someElement.first < 0 || target + someElement.first >= 8) {
+            continue;
+        }
+
+        if (target + someElement.second * 8 < 0 || target + someElement.second * 8 >= 8) {
+            continue;
+        }
+
+        BitMove b = BitMove(target, (target + someElement.first + (someElement.second * 8)), ChessPiece::Knight);
+
+        moves.push_back(b);
 
     }
 
@@ -378,8 +411,22 @@ bool Chess::canBitMoveFrom(Bit &bit, BitHolder &src)
     // std::cout << "check" << std::endl;
     // std::cout << "comparing " << currentPlayer << " and " << pieceColor << std::endl;
 
-    if (pieceColor == currentPlayer) return true;
-    return false;
+    if (pieceColor != currentPlayer) return false;
+    
+    // If we can move, then generate all possible moves dependent on it
+
+    moves.clear();
+
+    ChessSquare* temp = (ChessSquare*)(&src);
+
+    Chess::generateBitBoards(temp->getSquareIndex());
+
+    std::cout << "Looking at : " << temp->getSquareIndex() << std::endl;
+    std::cout << "The moves length is not at : " << moves.size() << std::endl;
+
+    // if (_gameOptions.currentTurnNo)
+    
+    return true;
 }
 
 void Chess::bitMovedFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
