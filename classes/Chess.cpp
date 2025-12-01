@@ -26,7 +26,7 @@ void Chess::generateBitBoards(int target) {
 
     // Add logic to only do it based on the player playing
 
-    Chess::generateKnightBitBoards(target);
+    // Chess::generateKnightBitBoards(target);
 
 }
 
@@ -196,7 +196,7 @@ void Chess::generateKnightBitBoards() {
 
 }
 
-void Chess::generateKnightBitBoards(int target) {
+void Chess::generateKnightMoves(int target, const std::string &state, bool isBlack) {
 
     std::pair<int, int>offsets[] = {
         {-2, -1}, {-1, -2}, {1, -2}, {2, -1},
@@ -205,16 +205,32 @@ void Chess::generateKnightBitBoards(int target) {
 
     for (std::pair<int, int> someElement : offsets) {
 
-        if (target + someElement.first < 0 || target + someElement.first >= 8) {
+        if ((target % 8) + someElement.first < 0 || (target % 8) + someElement.first >= 8) {
             continue;
         }
 
-        if (target + someElement.second * 8 < 0 || target + someElement.second * 8 >= 8) {
+        if ((target / 8) + someElement.second < 0 || (target / 8) + someElement.second >= 8) {
             continue;
         }
 
-        BitMove b = BitMove(target, (target + someElement.first + (someElement.second * 8)), ChessPiece::Knight);
+        int looking_at = target + someElement.first + (someElement.second * 8);
 
+        if (state[looking_at] != '0') {
+            if (isBlack) {
+                if (std::islower(state[looking_at])) {
+                    continue;
+                }
+            }
+            else {
+                if (std::isupper(state[looking_at])) {
+                    continue;
+                }
+            }
+        }
+
+        // std::cout << "valid at " << looking_at << std::endl;
+
+        BitMove b = BitMove(target, looking_at, ChessPiece::Knight);
         moves.push_back(b);
 
     }
@@ -419,12 +435,43 @@ bool Chess::canBitMoveFrom(Bit &bit, BitHolder &src)
 
     ChessSquare* temp = (ChessSquare*)(&src);
 
-    Chess::generateBitBoards(temp->getSquareIndex());
+    // Bad general call...
+    // Chess::generateBitBoards(temp->getSquareIndex());
+
+    // std::cout << "piece color = " << pieceColor << std::endl;
 
     std::cout << "Looking at : " << temp->getSquareIndex() << std::endl;
-    std::cout << "The moves length is not at : " << moves.size() << std::endl;
+    std::cout << "The moves length is at : " << moves.size() << std::endl;
 
-    // if (_gameOptions.currentTurnNo)
+    ChessPiece pieceType = (ChessPiece)(bit.gameTag() < 128 ? bit.gameTag() : bit.gameTag() - 128);
+    int target = temp->getSquareIndex();
+    bool isBlack = pieceColor;
+
+    std::string state = stateString();
+
+    switch (pieceType) {
+
+        case ChessPiece::Pawn: 
+
+            break;
+
+        case ChessPiece::Knight:
+
+            generateKnightMoves(temp->getSquareIndex(), state, isBlack);
+
+            break;
+
+        case ChessPiece::King:
+
+            
+
+            break;
+
+        default: 
+            break;
+
+    }
+
     
     return true;
 }

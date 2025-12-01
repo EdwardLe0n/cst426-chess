@@ -43,7 +43,8 @@ public:
     void generateBlackPawnBitBoards();
 
     void generateBitBoards(int target);
-    void generateKnightBitBoards(int target);
+
+    void generateKnightMoves(int target, const std::string &state, bool isBlack);
 
     void printBitboard(uint64_t some_board);
 
