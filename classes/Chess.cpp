@@ -228,9 +228,120 @@ void Chess::generateKnightMoves(int target, const std::string &state, bool isBla
             }
         }
 
+        BitMove b = BitMove(target, looking_at, ChessPiece::Knight);
+        moves.push_back(b);
+
+    }
+
+}
+
+void Chess::generateWhitePawnMoves(int target, const std::string &state, bool isBlack) {
+
+    if (state[target + 8] == '0') {
+        
+        moves.push_back(BitMove(target, target + 8, ChessPiece::Pawn));
+
+        if (target + 16 < 64) {
+
+            if (state[target + 16] == '0' && target / 8 == 1) {
+
+                moves.push_back(BitMove(target, target + 16, ChessPiece::Pawn));
+
+            }
+
+        }
+        
+    }
+    
+    // Check left up
+    if (target + 7 < 64 && ((target % 8) - 1) > 0) {
+        if(std::islower(state[target + 7])) {
+            moves.push_back(BitMove(target, target + 7, ChessPiece::Pawn));
+        }
+    }
+
+    // Check right up
+    if (target + 9 < 64 && ((target % 8) + 1) < 8) {
+        if(std::islower(state[target + 9])) {
+            moves.push_back(BitMove(target, target + 9, ChessPiece::Pawn));
+        }
+    }
+
+}
+
+void Chess::generateBlackPawnMoves(int target, const std::string &state, bool isBlack) {
+
+    if (target - 8 < 0) {
+        return;
+    }
+
+    if (state[target - 8] == '0') {
+        
+        moves.push_back(BitMove(target, target - 8, ChessPiece::Pawn));
+
+        if (target - 16 >= 0) {
+
+            if (state[target - 16] == '0' && target / 8 == 6) {
+
+                moves.push_back(BitMove(target, target - 16, ChessPiece::Pawn));
+
+            }
+
+        } 
+        
+    }
+
+    // Check left down
+    if (target - 9 >= 0 && ((target % 8) - 1) > 0) {
+        if(std::isupper(state[target - 9])) {
+            moves.push_back(BitMove(target, target - 9, ChessPiece::Pawn));
+        }
+    }
+
+    // Check right down
+    if (target - 7 >= 0 && ((target % 8) + 1) < 8) {
+        if(std::isupper(state[target - 7])) {
+            moves.push_back(BitMove(target, target - 7, ChessPiece::Pawn));
+        }
+    }
+
+}
+
+void Chess::generateKingMoves(int target, const std::string &state, bool isBlack) {
+
+    std::pair<int, int>offsets[] = {
+        {-1, 0}, {-1, -1}, {0, -1}, {1, -1},
+        {1, 0}, {1, 1}, {0, 1}, {-1, 1}
+    };
+
+    for (std::pair<int, int> someElement : offsets) {
+
+        if ((target % 8) + someElement.first < 0 || (target % 8) + someElement.first >= 8) {
+            continue;
+        }
+
+        if ((target / 8) + someElement.second < 0 || (target / 8) + someElement.second >= 8) {
+            continue;
+        }
+
+        int looking_at = target + someElement.first + (someElement.second * 8);
+
+        if (state[looking_at] != '0') {
+            if (isBlack) {
+                if (std::islower(state[looking_at])) {
+                    continue;
+                }
+            }
+            else {
+                if (std::isupper(state[looking_at])) {
+                    continue;
+                }
+            }
+        }
+
         // std::cout << "valid at " << looking_at << std::endl;
 
-        BitMove b = BitMove(target, looking_at, ChessPiece::Knight);
+        BitMove b = BitMove(target, looking_at, ChessPiece::King);
         moves.push_back(b);
 
     }
@@ -453,17 +564,24 @@ bool Chess::canBitMoveFrom(Bit &bit, BitHolder &src)
 
         case ChessPiece::Pawn: 
 
+            if (isBlack) {
+                generateBlackPawnMoves(target, state, isBlack);
+            } 
+            else {
+                generateWhitePawnMoves(target, state, isBlack);
+            }
+
             break;
 
         case ChessPiece::Knight:
 
-            generateKnightMoves(temp->getSquareIndex(), state, isBlack);
+            generateKnightMoves(target, state, isBlack);
 
             break;
 
         case ChessPiece::King:
 
-            
+            generateKingMoves(target, state, isBlack);
 
             break;
 
@@ -472,6 +590,7 @@ bool Chess::canBitMoveFrom(Bit &bit, BitHolder &src)
 
     }
 
+    std::cout << "The moves length is now at : " << moves.size() << std::endl;
     
     return true;
 }
@@ -479,10 +598,9 @@ bool Chess::canBitMoveFrom(Bit &bit, BitHolder &src)
 void Chess::bitMovedFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
 {
 
-    // if (Chess::canBitMoveFromTo())
+    // ChessPiece pieceType = 
 
 	endTurn();
-    // _gameOptions.currentTurnNo += 1;
 
 }
 

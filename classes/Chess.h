@@ -45,6 +45,9 @@ public:
     void generateBitBoards(int target);
 
     void generateKnightMoves(int target, const std::string &state, bool isBlack);
+    void generateKingMoves(int target, const std::string &state, bool isBlack);
+    void generateWhitePawnMoves(int target, const std::string &state, bool isBlack);
+    void generateBlackPawnMoves(int target, const std::string &state, bool isBlack);
 
     void printBitboard(uint64_t some_board);
 
