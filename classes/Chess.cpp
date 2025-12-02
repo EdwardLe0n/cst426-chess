@@ -94,7 +94,7 @@ void Chess::generateBlackPawnBitBoards() {
             }
 
             // Sanity
-            Chess::printBitboard(blackPawnMoveBitBoards[(y * 8) + x]);
+            // Chess::printBitboard(blackPawnMoveBitBoards[(y * 8) + x]);
 
         }
 

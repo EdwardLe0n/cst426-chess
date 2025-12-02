@@ -2,11 +2,9 @@
 
 #include "Game.h"
 #include "Grid.h"
-#include "Bitboard.h"
+#include "GameState.h"
 
 constexpr int pieceSize = 80;
-
-typedef uint64_t BitBoard;
 
 class Chess : public Game
 {
