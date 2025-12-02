@@ -489,179 +489,22 @@ void Chess::bitMovedFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
 bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
 {
 
-    // if (src.bit()->getOwner()->playerNumber() != (_isWhitePlaying ? 0 : 1)) {
-    //     return false;
-    // }
-
     ChessPiece pieceType = (ChessPiece)(bit.gameTag() < 128 ? bit.gameTag() : bit.gameTag() - 128);
 
     // get chess piece data from bitholder
         
     ChessSquare *from = (ChessSquare*)(&src);
 
-    std::pair<int, int> from_locat = {from->getColumn(), from->getRow()};
+    int from_locat = from->getSquareIndex();
 
     ChessSquare *to = (ChessSquare*)(&dst);
-    std::pair<int, int> to_locat = {to->getColumn(), to->getRow()};
-    // std::pair<int, int> to_locat = {to->getColumn(), to->getRow() - 7};
+    int to_locat = to->getSquareIndex();
+    
+    for (auto element : moves) {
 
-    // std::cout << "From : " << from_locat.first << ", " << from_locat.second << std::endl;
-    // std::cout << "To : " << to_locat.first << ", " << to_locat.second << std::endl;
-
-    Player* currentPlayer = Game::getCurrentPlayer();
-
-    uint64_t friendly = 0;
-
-    if (currentPlayer->playerNumber() == 0) {
-        friendly = Chess::whiteOccupancy();
-    }
-    else {
-        friendly = Chess::blackOccupancy();
-    }
-
-    int from_index = (from_locat.second * 8) + from_locat.first;
-    int to_index = (to_locat.second * 8) + to_locat.first;
-
-    // std::cout << 
-
-    switch (pieceType) {
-
-        case ChessPiece::Pawn: 
-
-            // White pawn code
-            if (currentPlayer->playerNumber() == 0) {
-
-                // first, check move
-                if (
-                    ( ( whitePawnMoveBitBoards[from_index]
-                    & (1ULL << (uint64_t)(to_index)) )
-                    & ( ~( friendly | Chess::blackOccupancy() ) ) ) != 0
-                ) {
-
-                    if ((to_index / 8) - 1 == (from_index / 8)) {
-                        return true;
-                    }
-                    else {
-
-                        if (
-                            ( ( whitePawnMoveBitBoards[from_index]
-                            & (1ULL << (uint64_t)(to_index - 8)) )
-                            & ( ~( friendly | Chess::blackOccupancy() ) ) ) != 0
-                        ) {
-
-                            return true;
-
-                        }
-                        else {
-
-                            return false;
-
-                        }
-
-                    }
-
-                }
-                // then check attack
-
-                else {
-
-                    if (
-                        ( ( whitePawnAttackBitBoards[from_index]
-                        & (1ULL << (uint64_t)(to_index)) )
-                        & ( Chess::blackOccupancy() ) ) != 0
-                    ) {
-
-                        return true;
-
-                    }
-                    else {
-
-                        return false;
-
-                    }
-
-                }
-
-            }
-
-            // Black pawn code
-            else {
-
-                // first, check move
-                if (
-                    ( ( blackPawnMoveBitBoards[from_index]
-                    & (1ULL << (uint64_t)(to_index)) )
-                    & ( ~( friendly | Chess::whiteOccupancy() ) ) ) != 0
-                ) {
-
-                    if ((to_index / 8) + 1 == (from_index / 8)) {
-                        return true;
-                    }
-                    else {
-
-                        if (
-                            ( ( blackPawnMoveBitBoards[from_index]
-                            & (1ULL << (uint64_t)(to_index + 8)) )
-                            & ( ~( friendly | Chess::whiteOccupancy() ) ) ) != 0
-                        ) {
-
-                            return true;
-
-                        }
-                        else {
-
-                            return false;
-
-                        }
-
-                    }
-
-                }
-                // then check attack
-
-                else {
-
-                    if (
-                        ( ( blackPawnAttackBitBoards[from_index]
-                        & (1ULL << (uint64_t)(to_index)) )
-                        & ( Chess::whiteOccupancy() ) ) != 0
-                    ) {
-
-                        return true;
-
-                    }
-                    else {
-
-                        return false;
-
-                    }
-
-                }
-
-            }
-
-            break;
-
-        case ChessPiece::Knight:
-
-            if ((knightBitBoards[from_index] & (1ULL << (uint64_t)(to_index)) & ~friendly) != 0) {
-
-                return true;
-            }
-
-        break;
-
-        case ChessPiece::King:
-
-            if ((kingBitBoards[from_index] & (1ULL << (uint64_t)(to_index)) & ~friendly) != 0) {
-
-                return true;
-            }
-
-            break;
-
-        default: 
-            break;
+        if (element.to == to_locat) {
+            return true;
+        }
 
     }
 
