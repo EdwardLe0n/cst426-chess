@@ -59,7 +59,15 @@ void GameState::addPawnBitboardMovesToList(std::vector<BitMove>& moves, const Bi
         return;
     bitboard.forEachBit([&](int toSquare) {
         int fromSquare = toSquare - shift; // Correct calculation for fromSquare
+        
         moves.emplace_back(fromSquare, toSquare, Pawn);
+
+        // Working on promotion
+
+        // int y =
+
+        // moves.emplace_back( toSquare == 0 ? (fromSquare, toSquare, Pawn) : (fromSquare, toSquare, Pawn));
+
     });
 }
 

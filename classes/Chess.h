@@ -52,7 +52,7 @@ public:
     void printBitboard(uint64_t some_board);
 
     void updateAI();
-    int negamax();
+    int negamax(GameState& gamestate, int depth, int alpha, int beta);
     
     int evaluateBoard(const std::string &state);
     std::vector<BitMove> generateAllMoves();
@@ -81,5 +81,7 @@ private:
     bool _isWhitePlaying;
 
     std::vector<BitMove> moves;
+
+    int negamaxCalls;
     
 };

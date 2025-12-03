@@ -6,6 +6,7 @@
 Chess::Chess()
 {
     _grid = new Grid(8, 8);
+    negamaxCalls = 0;
 }
 
 Chess::~Chess()
@@ -547,6 +548,11 @@ void Chess::bitMovedFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
 
     endTurn();
 
+    // do AI stuff here
+    if (gameHasAI()) {
+        updateAI();
+    }
+
     generateMoves();
 
 }
@@ -581,7 +587,7 @@ void Chess::generateMoves() {
 
     moves.clear();
 
-    int player = getCurrentPlayer()->playerNumber()  == 0 ? WHITE : BLACK;
+    int player = getCurrentPlayer()->playerNumber() == 0 ? WHITE : BLACK;
 
     GameState gs;
     gs.init(stateString().c_str(), player);
@@ -693,7 +699,6 @@ void Chess::setStateString(const std::string &s)
     });
 }
 
-
 void Chess::printBitboard(uint64_t some_board) {
     std::cout << "\n  a b c d e f g h\n";
     for (int rank = 7; rank >= 0; rank--) {
@@ -715,15 +720,88 @@ void Chess::printBitboard(uint64_t some_board) {
 
 void Chess::updateAI() {
 
-    
+    negamaxCalls = 0;
+    int player = getCurrentPlayer()->playerNumber() == 0 ? WHITE : BLACK;
 
-    // BitMove
+    GameState gs;
+    gs.init(stateString().c_str(), player);
 
-    // if (bestMove)
+    int bestMove = -100000;
+    BitMove bestSquare = BitMove();
+
+    int alpha = -100000;
+    int beta = 100000;
+
+    std::vector moves = gs.generateAllMoves();
+
+    for (auto element : moves) {
+
+        // puts most recent move into the game state
+        gs.pushMove(element);
+
+        int currentMove = negamax(gs, 0, alpha, beta);
+
+        if (currentMove > bestMove) {
+            bestMove = currentMove;
+            bestSquare = element;
+        }
+
+        // clears past move from state
+        gs.popState();
+
+    }
+
+    std::cout << "total negamax calls : " << negamaxCalls;
+
+    if (bestMove != -100000) {
+        std::cout << "Best move was from : " << std::to_string(bestSquare.from) << " to " << std::to_string(bestSquare.to);
+
+        ChessSquare* fromSquare = _grid->getSquareByIndex(bestSquare.from);
+        ChessSquare* toSquare = _grid->getSquareByIndex(bestSquare.to);
+
+        // toSquare.
+
+    } 
+
+    endTurn();
 
 }
 
-int Chess::negamax() {
+int Chess::negamax(GameState& gs, int depth, int alpha, int beta) {
+
+    negamaxCalls++;
+
+    // run initial checks
+
+    if (depth == 4) {
+
+        return 1;
+
+    }
+
+    // then do more negamax
+
+    int bestMove = -100000;
+
+    std::vector moves = gs.generateAllMoves();
+
+    for (auto element : moves) {
+
+        // puts most recent move into the game state
+        gs.pushMove(element);
+
+        int currentMove = negamax(gs, depth + 1, alpha, beta);
+
+        if (currentMove > bestMove) {
+            bestMove = currentMove;
+        }
+
+        // clears past move from state
+        gs.popState();
+
+    }
+
+    return bestMove;
 
     // int score = checkForAIWinner(state, _gameOptions, playerColor);
 
@@ -765,8 +843,6 @@ int Chess::negamax() {
     //     }
 
     // }
-
-    return 0;
 
 }
 
