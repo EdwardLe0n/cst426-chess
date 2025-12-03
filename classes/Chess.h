@@ -42,10 +42,12 @@ public:
 
     void generateBitBoards(int target);
 
-    void generateKnightMoves(int target, const std::string &state, bool isBlack);
-    void generateKingMoves(int target, const std::string &state, bool isBlack);
-    void generateWhitePawnMoves(int target, const std::string &state, bool isBlack);
-    void generateBlackPawnMoves(int target, const std::string &state, bool isBlack);
+    void generateKnightMoves(std::vector<BitMove>& moves, int target, const std::string &state, bool isBlack);
+    void generateKingMoves(std::vector<BitMove>& moves, int target, const std::string &state, bool isBlack);
+    void generateWhitePawnMoves(std::vector<BitMove>& moves, int target, const std::string &state, bool isBlack);
+    void generateBlackPawnMoves(std::vector<BitMove>& moves, int target, const std::string &state, bool isBlack);
+
+    void generateMoves();
 
     void printBitboard(uint64_t some_board);
 

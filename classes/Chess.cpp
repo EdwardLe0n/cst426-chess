@@ -196,7 +196,7 @@ void Chess::generateKnightBitBoards() {
 
 }
 
-void Chess::generateKnightMoves(int target, const std::string &state, bool isBlack) {
+void Chess::generateKnightMoves(std::vector<BitMove>& moves, int target, const std::string &state, bool isBlack) {
 
     std::pair<int, int>offsets[] = {
         {-2, -1}, {-1, -2}, {1, -2}, {2, -1},
@@ -228,24 +228,23 @@ void Chess::generateKnightMoves(int target, const std::string &state, bool isBla
             }
         }
 
-        BitMove b = BitMove(target, looking_at, ChessPiece::Knight);
-        moves.push_back(b);
+        moves.emplace_back(target, looking_at, ChessPiece::Knight);
 
     }
 
 }
 
-void Chess::generateWhitePawnMoves(int target, const std::string &state, bool isBlack) {
+void Chess::generateWhitePawnMoves(std::vector<BitMove>& moves, int target, const std::string &state, bool isBlack) {
 
     if (state[target + 8] == '0') {
         
-        moves.push_back(BitMove(target, target + 8, ChessPiece::Pawn));
+        moves.emplace_back(target, target + 8, ChessPiece::Pawn);
 
         if (target + 16 < 64) {
 
             if (state[target + 16] == '0' && target / 8 == 1) {
 
-                moves.push_back(BitMove(target, target + 16, ChessPiece::Pawn));
+                moves.emplace_back(target, target + 16, ChessPiece::Pawn);
 
             }
 
@@ -256,20 +255,20 @@ void Chess::generateWhitePawnMoves(int target, const std::string &state, bool is
     // Check left up
     if (target + 7 < 64 && ((target % 8) - 1) > 0) {
         if(std::islower(state[target + 7])) {
-            moves.push_back(BitMove(target, target + 7, ChessPiece::Pawn));
+            moves.emplace_back(target, target + 7, ChessPiece::Pawn);
         }
     }
 
     // Check right up
     if (target + 9 < 64 && ((target % 8) + 1) < 8) {
         if(std::islower(state[target + 9])) {
-            moves.push_back(BitMove(target, target + 9, ChessPiece::Pawn));
+            moves.emplace_back(target, target + 9, ChessPiece::Pawn);
         }
     }
 
 }
 
-void Chess::generateBlackPawnMoves(int target, const std::string &state, bool isBlack) {
+void Chess::generateBlackPawnMoves(std::vector<BitMove>& moves, int target, const std::string &state, bool isBlack) {
 
     if (target - 8 < 0) {
         return;
@@ -277,13 +276,13 @@ void Chess::generateBlackPawnMoves(int target, const std::string &state, bool is
 
     if (state[target - 8] == '0') {
         
-        moves.push_back(BitMove(target, target - 8, ChessPiece::Pawn));
+        moves.emplace_back(target, target - 8, ChessPiece::Pawn);
 
         if (target - 16 >= 0) {
 
             if (state[target - 16] == '0' && target / 8 == 6) {
 
-                moves.push_back(BitMove(target, target - 16, ChessPiece::Pawn));
+                moves.emplace_back(target, target - 16, ChessPiece::Pawn);
 
             }
 
@@ -294,20 +293,20 @@ void Chess::generateBlackPawnMoves(int target, const std::string &state, bool is
     // Check left down
     if (target - 9 >= 0 && ((target % 8) - 1) > 0) {
         if(std::isupper(state[target - 9])) {
-            moves.push_back(BitMove(target, target - 9, ChessPiece::Pawn));
+            moves.emplace_back(target, target - 9, ChessPiece::Pawn);
         }
     }
 
     // Check right down
     if (target - 7 >= 0 && ((target % 8) + 1) < 8) {
         if(std::isupper(state[target - 7])) {
-            moves.push_back(BitMove(target, target - 7, ChessPiece::Pawn));
+            moves.emplace_back(target, target - 7, ChessPiece::Pawn);
         }
     }
 
 }
 
-void Chess::generateKingMoves(int target, const std::string &state, bool isBlack) {
+void Chess::generateKingMoves(std::vector<BitMove>& moves, int target, const std::string &state, bool isBlack) {
 
     std::pair<int, int>offsets[] = {
         {-1, 0}, {-1, -1}, {0, -1}, {1, -1},
@@ -339,10 +338,7 @@ void Chess::generateKingMoves(int target, const std::string &state, bool isBlack
             }
         }
 
-        // std::cout << "valid at " << looking_at << std::endl;
-
-        BitMove b = BitMove(target, looking_at, ChessPiece::King);
-        moves.push_back(b);
+        moves.emplace_back(target, looking_at, ChessPiece::King);
 
     }
 
@@ -397,6 +393,7 @@ void Chess::setUpBoard()
     _isWhitePlaying = true;
 
     startGame();
+    generateMoves();
 }
 
 void Chess::FENtoBoard(const std::string& fen) {
@@ -530,77 +527,27 @@ bool Chess::actionForEmptyHolder(BitHolder &holder)
 
 bool Chess::canBitMoveFrom(Bit &bit, BitHolder &src)
 {
-    // need to implement friendly/unfriendly in bit so for now this hack
-    int currentPlayer = getCurrentPlayer()->playerNumber() * 128;
-    int pieceColor = bit.gameTag() & 128;
-
-    // Sanity
-    // std::cout << "check" << std::endl;
-    // std::cout << "comparing " << currentPlayer << " and " << pieceColor << std::endl;
-
-    if (pieceColor != currentPlayer) return false;
-    
-    // If we can move, then generate all possible moves dependent on it
-
-    moves.clear();
 
     ChessSquare* temp = (ChessSquare*)(&src);
+    int from_locat = temp->getSquareIndex();
 
-    // Bad general call...
-    // Chess::generateBitBoards(temp->getSquareIndex());
+    for (auto element : moves) {
 
-    // std::cout << "piece color = " << pieceColor << std::endl;
-
-    std::cout << "Looking at : " << temp->getSquareIndex() << std::endl;
-    std::cout << "The moves length is at : " << moves.size() << std::endl;
-
-    ChessPiece pieceType = (ChessPiece)(bit.gameTag() < 128 ? bit.gameTag() : bit.gameTag() - 128);
-    int target = temp->getSquareIndex();
-    bool isBlack = pieceColor;
-
-    std::string state = stateString();
-
-    switch (pieceType) {
-
-        case ChessPiece::Pawn: 
-
-            if (isBlack) {
-                generateBlackPawnMoves(target, state, isBlack);
-            } 
-            else {
-                generateWhitePawnMoves(target, state, isBlack);
-            }
-
-            break;
-
-        case ChessPiece::Knight:
-
-            generateKnightMoves(target, state, isBlack);
-
-            break;
-
-        case ChessPiece::King:
-
-            generateKingMoves(target, state, isBlack);
-
-            break;
-
-        default: 
-            break;
+        if (element.from == from_locat) {
+            return true;
+        }
 
     }
-
-    std::cout << "The moves length is now at : " << moves.size() << std::endl;
     
-    return true;
+    return false;
 }
 
 void Chess::bitMovedFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
 {
 
-    // ChessPiece pieceType = 
+    endTurn();
 
-	endTurn();
+    generateMoves();
 
 }
 
@@ -612,7 +559,6 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
     // get chess piece data from bitholder
         
     ChessSquare *from = (ChessSquare*)(&src);
-
     int from_locat = from->getSquareIndex();
 
     ChessSquare *to = (ChessSquare*)(&dst);
@@ -620,13 +566,28 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
     
     for (auto element : moves) {
 
-        if (element.to == to_locat) {
-            return true;
+        if (element.from == from_locat) {
+            if (element.to == to_locat) {
+                return true;
+            }
         }
 
     }
 
     return false;
+}
+
+void Chess::generateMoves() {
+
+    moves.clear();
+
+    int player = getCurrentPlayer()->playerNumber()  == 0 ? WHITE : BLACK;
+
+    GameState gs;
+    gs.init(stateString().c_str(), player);
+
+    moves = gs.generateAllMoves();
+
 }
 
 void Chess::stopGame()
