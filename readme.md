@@ -415,12 +415,184 @@ bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
 
     return false;
 }
-
 ```
 
 is not readable
 
-And it had a large flaw, being that 
+And it has a large flaw, being that it would do all those calculations every frame, which is considerably wasteful of resources. Instead, it was at this time that I started to move to the BitMovedFrom system to generate all the moves of a given piece the moment it was picked up. Then, during the BitMovedFromTo lifetime cycle, I would then iterate through all the generated moves to compare the validity of a move.
+
+So fun fact, this change then allowed my BitMoveFromTo to then look like this:
+
+```
+bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
+{
+
+    ChessPiece pieceType = (ChessPiece)(bit.gameTag() < 128 ? bit.gameTag() : bit.gameTag() - 128);
+
+    // get chess piece data from bitholder
+        
+    ChessSquare *from = (ChessSquare*)(&src);
+    int from_locat = from->getSquareIndex();
+
+    ChessSquare *to = (ChessSquare*)(&dst);
+    int to_locat = to->getSquareIndex();
+    
+    for (auto element : moves) {
+
+        if (element.from == from_locat) {
+            if (element.to == to_locat) {
+                return true;
+            }
+        }
+
+    }
+
+    return false;
+}
+```
+
++100 lines on unnecessary code... gone...
+
+Dear lord, I love readable code.
+
+However, in order to accomplish this, I then needed to, at every pick up of a piece, generate all the valid moves for that piece. This was then accomplished through the use of a switch case as seen here, which then lead to various driver functions.
+
+```
+ChessPiece pieceType = (ChessPiece)(bit.gameTag() < 128 ? bit.gameTag() : bit.gameTag() - 128);
+int target = temp->getSquareIndex();
+bool isBlack = pieceColor;
+
+std::string state = stateString();
+
+switch (pieceType) {
+
+    case ChessPiece::Pawn: 
+
+        if (isBlack) {
+            generateBlackPawnMoves(target, state, isBlack);
+        } 
+        else {
+            generateWhitePawnMoves(target, state, isBlack);
+        }
+
+        break;
+
+    case ChessPiece::Knight:
+
+        generateKnightMoves(target, state, isBlack);
+
+        break;
+
+    case ChessPiece::King:
+
+        generateKingMoves(target, state, isBlack);
+
+        break;
+
+    default: 
+        break;
+}
+
+```
+
+As mentioned previously, I also needed driver functions to generate movement for my pieces. These took forms in two main styles of movement:
+
+1. The In-Line Style
+2. The Offset Style
+
+### The In-Line Style
+
+The in-line style that I worked on was to simply avoid the use in some scenarios, being just with pawn movement generation. 
+
+When it comes to times, this does end up being slower due to the fact that there is branching behavior here and there. However, I do enjoy the act of being able to look at any given position, and generate the movements through if checks as I feel that the code is fairly legible.
+
+```
+void Chess::generateBlackPawnMoves(std::vector<BitMove>& moves, int target, const std::string &state, bool isBlack) {
+
+    if (target - 8 < 0) {
+        return;
+    }
+
+    if (state[target - 8] == '0') {
+        
+        moves.emplace_back(target, target - 8, ChessPiece::Pawn);
+
+        if (target - 16 >= 0) {
+
+            if (state[target - 16] == '0' && target / 8 == 6) {
+
+                moves.emplace_back(target, target - 16, ChessPiece::Pawn);
+
+            }
+
+        } 
+        
+    }
+
+    // Check left down
+    if (target - 9 >= 0 && ((target % 8) - 1) > 0) {
+        if(std::isupper(state[target - 9])) {
+            moves.emplace_back(target, target - 9, ChessPiece::Pawn);
+        }
+    }
+
+    // Check right down
+    if (target - 7 >= 0 && ((target % 8) + 1) < 8) {
+        if(std::isupper(state[target - 7])) {
+            moves.emplace_back(target, target - 7, ChessPiece::Pawn);
+        }
+    }
+
+}
+```
+
+### The Offset Style
+
+The offset style is the easier of the two, in which I utilize a pair of offsets to check whether the targeted moves are within the bounds of the board.
+
+Of the two styles, this was by far the easier one, and was quite enjoyable to make after the entire board flip debacle.
+
+```
+void Chess::generateKingMoves(std::vector<BitMove>& moves, int target, const std::string &state, bool isBlack) {
+
+    std::pair<int, int>offsets[] = {
+        {-1, 0}, {-1, -1}, {0, -1}, {1, -1},
+        {1, 0}, {1, 1}, {0, 1}, {-1, 1}
+    };
+
+    for (std::pair<int, int> someElement : offsets) {
+
+        if ((target % 8) + someElement.first < 0 || (target % 8) + someElement.first >= 8) {
+            continue;
+        }
+
+        if ((target / 8) + someElement.second < 0 || (target / 8) + someElement.second >= 8) {
+            continue;
+        }
+
+        int looking_at = target + someElement.first + (someElement.second * 8);
+
+        if (state[looking_at] != '0') {
+            if (isBlack) {
+                if (std::islower(state[looking_at])) {
+                    continue;
+                }
+            }
+            else {
+                if (std::isupper(state[looking_at])) {
+                    continue;
+                }
+            }
+        }
+
+        moves.emplace_back(target, looking_at, ChessPiece::King);
+
+    }
+
+}
+```
+
+So with that being done, all I needed to work on next was rook movement, bishop movement, queen movement, and negamax with alpha bet pruning.
 
 ## Chess Movement - Part 4 + AI - So we using GameState now
 
@@ -439,3 +611,29 @@ So to prep it for the tourney, I did these three things:
 1. Implement the standard negamax functionality
 2. Implement piece weights
 3. Implement weight maps for each individual piece
+
+### Tackling Negamax
+
+Thankfully, due to the game state system, it has then allowed any implementation of negamax to look clean. So with that in mind, I won't mention the standard conversion story. Also yeah, alpha beta cutoff exists!
+
+I will note though that I do have a safeguard for when no new moves have been generated in which the system will simply return the current evaluation of the board.
+
+### Tackling Piece Weights
+
+Of all the issues, this was by far the easiest, as all it is is just iterating through the game state and summing up the value of the board. However, it is worth playing around with the system to change what the engine prioritizes
+
+### Tackling Weight Maps
+
+I'm a stubborn gremlin that apparently wants to make weight tables by hand.
+
+With that being said, this was an easy add, but tedious work that most likely did not need to be done by hand. However, due to the size and nature of the boards, I believe that I'll find it difficult to edit and keep the weight maps consistent throughout. as even the examples shown had mirroring issues 
+
+### Conclusion (for now)
+
+I very much enjoyed the process of making another AI! With that being said, I would like to implement at least pawn promotion to make the AI tournament ready.
+
+After that, castling would be a great addition!
+
+However, en passant will not be added simply due to the current time frame and just due to the fact that it sounds like way too much work for something that happens once in a blue moon.
+
+So yeah, can't wait to eat my words there.
