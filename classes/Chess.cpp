@@ -788,6 +788,10 @@ int Chess::negamax(GameState& gs, int depth, int alpha, int beta, int playerColo
 
     std::vector moves = gs.generateAllMoves();
 
+    if (moves.size() == 0) {
+        return -evaluateBoard(gs.state);
+    }
+
     for (auto element : moves) {
 
         // puts most recent move into the game state
