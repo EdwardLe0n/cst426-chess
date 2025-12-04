@@ -155,10 +155,287 @@ So yeah, debugging now calls my name.
 
 ## Chess Movement - Part 1 + 1/2
 
-#### Date : 11/18/2025
+#### Date : 11/18/2025 - 11/19/2025
 
 So after a chat with my professor, I realized that I was handling movement fairly incorrectly. Whilst I'd like to say that it was eventful for at least the local portion of the code, many sections of the code say other wise.
 
 With that in mind, here's a list of problems that spewed up:
 
-- ***Still a WIP***
+- Reused code in multiple sections
+- Interpreting the state string incorrectly
+
+To fix redundant code, I simply moved many duplicate move calls of new bits to one generalized location.
+
+Yet, for some reason, when dealing with movement generation, the state string seemed to be off.
+
+With that in mind, I went to bed.
+
+## Chess Movement - Part 2
+
+#### Date : 11/19/2025 - 11/27/2025
+
+After some work, I went ahead and chatted with my professor about some random bug in which the state string was not reflective of the visible game.
+
+Those chats then brought in this philosophy about the code base:
+
+- It's genuinely garbage oh my god
+
+### Why you may be wondering?
+
+Well, upon further investigation, it was found that during the initialization of my board, I was unintentionally flipping the entire board during the fen to string process.
+
+I wish I was kidding cause dear lord.
+
+Proof be below: 
+
+```
+void Chess::FENtoBoard(const std::string& fen) {
+    
+    ...
+    
+    int targetX = 0;
+    int targetY = 0;
+
+    for (int i = 0; i < fen.length(); i++) {
+
+        // Extra info logic
+        if (targetX == 8 && targetY == 7) {
+            
+            ...
+
+        }
+        // main driver code for setting up the board
+        else {
+
+        somePiece->setPosition(
+                ImVec2(
+                    (float)(targetX * pieceSize) + (float)(pieceSize / 2), 
+                    (float)(targetY * pieceSize) + (float)(pieceSize / 2)
+                )
+            );
+
+            _grid->getSquare(targetX, targetY)->setBit(somePiece);
+
+            targetX++;
+
+        }
+
+    }
+
+}
+
+```
+
+This was done by placing pieces on the opposite side of the board, but setting their position to be on the correct side. So whilst visually it all seemed to mesh well and that there some bug with the state string, in reality, the state string was warning me, but hey. We live and lear i guess.
+
+Following this incident and the changes I made to clean it up, I then focused on...
+
+- Implementing black pawns into the code base
+
+However, this development was short lived as...
+
+## Chess Movement - Part 3 (we like BitMoves now)
+
+#### Date : 11/27/2025 - 12/2/2025
+
+Frankly, I like being able to read code.
+
+This
+
+```
+bool Chess::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
+{
+
+    ChessPiece pieceType = (ChessPiece)(bit.gameTag() < 128 ? bit.gameTag() : bit.gameTag() - 128);
+
+    // get chess piece data from bitholder
+        
+    ChessSquare *from = (ChessSquare*)(&src);
+
+    std::pair<int, int> from_locat = {from->getColumn(), from->getRow()};
+
+    ChessSquare *to = (ChessSquare*)(&dst);
+    std::pair<int, int> to_locat = {to->getColumn(), to->getRow()};
+
+    Player* currentPlayer = Game::getCurrentPlayer();
+
+    uint64_t friendly = 0;
+
+    if (currentPlayer->playerNumber() == 0) {
+        friendly = Chess::whiteOccupancy();
+    }
+    else {
+        friendly = Chess::blackOccupancy();
+    }
+
+    int from_index = (from_locat.second * 8) + from_locat.first;
+    int to_index = (to_locat.second * 8) + to_locat.first;
+
+
+    switch (pieceType) {
+
+        case ChessPiece::Pawn: 
+
+            // White pawn code
+            if (currentPlayer->playerNumber() == 0) {
+
+                // first, check move
+                if (
+                    ( ( whitePawnMoveBitBoards[from_index]
+                    & (1ULL << (uint64_t)(to_index)) )
+                    & ( ~( friendly | Chess::blackOccupancy() ) ) ) != 0
+                ) {
+
+                    if ((to_index / 8) - 1 == (from_index / 8)) {
+                        return true;
+                    }
+                    else {
+
+                        if (
+                            ( ( whitePawnMoveBitBoards[from_index]
+                            & (1ULL << (uint64_t)(to_index - 8)) )
+                            & ( ~( friendly | Chess::blackOccupancy() ) ) ) != 0
+                        ) {
+
+                            return true;
+
+                        }
+                        else {
+
+                            return false;
+
+                        }
+
+                    }
+
+                }
+                // then check attack
+
+                else {
+
+                    if (
+                        ( ( whitePawnAttackBitBoards[from_index]
+                        & (1ULL << (uint64_t)(to_index)) )
+                        & ( Chess::blackOccupancy() ) ) != 0
+                    ) {
+
+                        return true;
+
+                    }
+                    else {
+
+                        return false;
+
+                    }
+
+                }
+
+            }
+
+            // Black pawn code
+            else {
+
+                // first, check move
+                if (
+                    ( ( blackPawnMoveBitBoards[from_index]
+                    & (1ULL << (uint64_t)(to_index)) )
+                    & ( ~( friendly | Chess::whiteOccupancy() ) ) ) != 0
+                ) {
+
+                    if ((to_index / 8) + 1 == (from_index / 8)) {
+                        return true;
+                    }
+                    else {
+
+                        if (
+                            ( ( blackPawnMoveBitBoards[from_index]
+                            & (1ULL << (uint64_t)(to_index + 8)) )
+                            & ( ~( friendly | Chess::whiteOccupancy() ) ) ) != 0
+                        ) {
+
+                            return true;
+
+                        }
+                        else {
+
+                            return false;
+
+                        }
+
+                    }
+
+                }
+                // then check attack
+
+                else {
+
+                    if (
+                        ( ( blackPawnAttackBitBoards[from_index]
+                        & (1ULL << (uint64_t)(to_index)) )
+                        & ( Chess::whiteOccupancy() ) ) != 0
+                    ) {
+
+                        return true;
+
+                    }
+                    else {
+
+                        return false;
+
+                    }
+
+                }
+
+            }
+
+            break;
+
+        case ChessPiece::Knight:
+
+            if ((knightBitBoards[from_index] & (1ULL << (uint64_t)(to_index)) & ~friendly) != 0) {
+
+                return true;
+            }
+
+        break;
+
+        case ChessPiece::King:
+
+            if ((kingBitBoards[from_index] & (1ULL << (uint64_t)(to_index)) & ~friendly) != 0) {
+
+                return true;
+            }
+
+            break;
+
+        default: 
+            break;
+
+    }
+
+    return false;
+}
+
+```
+
+is not readable
+
+And it had a large flaw, being that 
+
+## Chess Movement - Part 4 + AI - So we using GameState now
+
+#### Date : 12/2/2025 - 12/3/2025
+
+Upon much deliberation, I determined that I like sleep.
+
+This then took form in me scrapping all of my movement code that I developed and rewrote over the course of a few weeks in order to import and utilize movement code within the new GameState. 
+
+great
+
+In all honesty, I didn't mind this change in direction as instead of attempting to make my own rook/bishop/queen movement code, I could instead jump straight into working on the AI functionality to get it battle ready.
+
+So to prep it for the tourney, I did these three things:
+
+1. Implement the standard negamax functionality
+2. Implement piece weights
+3. Implement weight maps for each individual piece

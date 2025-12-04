@@ -720,6 +720,8 @@ void Chess::printBitboard(uint64_t some_board) {
 
 void Chess::updateAI() {
 
+    const auto searchStart = std::chrono::steady_clock::now();
+    
     negamaxCalls = 0;
     int player = getCurrentPlayer()->playerNumber() == 0 ? WHITE : BLACK;
 
@@ -754,6 +756,13 @@ void Chess::updateAI() {
     std::cout << "total negamax calls : " << negamaxCalls << std::endl;
 
     if (bestMove != -100000) {
+
+        const double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - searchStart).count();
+        const double boardsPerSecond = seconds > 0.0 ? static_cast<double>(negamaxCalls) / seconds : 0.0;
+        std::cout << "Moves checked: " << negamaxCalls
+              << " (" << std::fixed << std::setprecision(2) << boardsPerSecond
+              << " boards/s)" << std::defaultfloat << std::endl;
+
         std::cout << "Best move was from : " << std::to_string(bestSquare.from) << " to " << std::to_string(bestSquare.to) << std::endl;
 
         ChessSquare* fromSquare = _grid->getSquareByIndex(bestSquare.from);
@@ -812,47 +821,6 @@ int Chess::negamax(GameState& gs, int depth, int alpha, int beta, int playerColo
     }
 
     return bestMove;
-
-    // int score = checkForAIWinner(state, _gameOptions, playerColor);
-
-    // if (score) {
-
-    //     // a winning state here is a loss for the recursive parent
-    //     return -score;
-
-    // }
-
-    // int bestVal = -10000;
-
-    // for (int i = 0; i < _gameOptions.rowX; i++) {
-
-    //     int currentLocat = orderedSort[i];
-    //     int nextLocat = currentLocat + _gameOptions.rowX;
-
-    //     if(state[currentLocat] == '-') {
-
-    //         // needs to check the lowest location
-
-    //         while(!((nextLocat / _gameOptions.rowX) >= _gameOptions.rowY) && state[currentLocat] == '-'){
-
-    //             if (state[nextLocat] != '-') {
-    //                 break;
-    //             }
-
-    //             currentLocat = nextLocat;
-    //             nextLocat += _gameOptions.rowX;
-
-    //         }
-
-    //         // add weight here
-
-    //         // std::cout << "running into depth" << std::endl;
-
-    //         bestVal = std::max(bestVal, WEIGHT_TABLE[currentLocat / _gameOptions.rowX][currentLocat % _gameOptions.rowX]);
-
-    //     }
-
-    // }
 
 }
 
