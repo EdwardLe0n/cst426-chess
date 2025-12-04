@@ -739,7 +739,7 @@ void Chess::updateAI() {
         // puts most recent move into the game state
         gs.pushMove(element);
 
-        int currentMove = negamax(gs, 0, alpha, beta);
+        int currentMove = -negamax(gs, 0, alpha, beta, BLACK);
 
         if (currentMove > bestMove) {
             bestMove = currentMove;
@@ -751,15 +751,18 @@ void Chess::updateAI() {
 
     }
 
-    std::cout << "total negamax calls : " << negamaxCalls;
+    std::cout << "total negamax calls : " << negamaxCalls << std::endl;
 
     if (bestMove != -100000) {
-        std::cout << "Best move was from : " << std::to_string(bestSquare.from) << " to " << std::to_string(bestSquare.to);
+        std::cout << "Best move was from : " << std::to_string(bestSquare.from) << " to " << std::to_string(bestSquare.to) << std::endl;
 
         ChessSquare* fromSquare = _grid->getSquareByIndex(bestSquare.from);
         ChessSquare* toSquare = _grid->getSquareByIndex(bestSquare.to);
 
-        // toSquare.
+        toSquare->setBit(fromSquare->bit());
+        toSquare->bit()->moveTo(toSquare->getPosition());
+        
+        fromSquare->setBit(nullptr);
 
     } 
 
@@ -767,15 +770,15 @@ void Chess::updateAI() {
 
 }
 
-int Chess::negamax(GameState& gs, int depth, int alpha, int beta) {
+int Chess::negamax(GameState& gs, int depth, int alpha, int beta, int playerColor) {
 
     negamaxCalls++;
 
     // run initial checks
 
-    if (depth == 4) {
+    if (depth >= 5) {
 
-        return 1;
+        return -evaluateBoard(gs.state);
 
     }
 
@@ -790,10 +793,13 @@ int Chess::negamax(GameState& gs, int depth, int alpha, int beta) {
         // puts most recent move into the game state
         gs.pushMove(element);
 
-        int currentMove = negamax(gs, depth + 1, alpha, beta);
+        bestMove = std::max(bestMove, -negamax(gs, depth + 1, -beta, -alpha, -playerColor));
 
-        if (currentMove > bestMove) {
-            bestMove = currentMove;
+        alpha = std::max(alpha, bestMove);
+
+        if (alpha > beta) {
+            gs.popState();
+            break;
         }
 
         // clears past move from state
@@ -846,25 +852,89 @@ int Chess::negamax(GameState& gs, int depth, int alpha, int beta) {
 
 }
 
-int Chess::evaluateBoard(const std::string &state) {
+int Chess::evaluateBoard(const char state[64]) {
 
     int boardValues[128];
+ 
+    boardValues['P'] = 10  ;
+    boardValues['N'] = 30  ;
+    boardValues['B'] = 30  ;
+    boardValues['R'] = 50  ;
+    boardValues['Q'] = 90  ;
+    boardValues['K'] = 900 ;
+    boardValues['p'] = -10 ;
+    boardValues['n'] = -30 ;
+    boardValues['b'] = -30 ;
+    boardValues['r'] = -50 ;
+    boardValues['q'] = -90 ;
+    boardValues['k'] = -900;
+    boardValues['0'] = 0;
 
-    // boardValues['P'] = ;
-    // boardValues['N'] = ;
-    // boardValues['B'] = ;
-    // boardValues['R'] = ;
-    // boardValues['Q'] = ;
-    // boardValues['K'] = ;
-    // boardValues['p'] = ;
-    // boardValues['n'] = ;
-    // boardValues['b'] = ;
-    // boardValues['r'] = ;
-    // boardValues['q'] = ;
-    // boardValues['k'] = ;
-    // boardValues['k'] = 0;
+    int sum = 0;
 
-    return 0;
+    for(int i = 0; i < 64; i++) {
+
+        sum += boardValues[state[i]];
+
+        switch (state[i])
+        {
+            case 'P':
+                sum += whitePawnBoard[i];
+                break;
+
+            case 'N':
+                sum += whiteKnightBoard[i];
+                break;
+
+            case 'B':
+                sum += whiteBishopBoard[i];
+                break;
+
+            case 'R':
+                sum += whiteRookBoard[i];
+                break;
+
+            case 'Q':
+                sum += whiteQueenBoard[i];
+                break;
+
+            case 'K':
+                sum += whiteKingBoard[i];
+                break;
+
+            case 'p':
+                sum += blackPawnBoard[i];
+                break;
+
+            case 'n':
+                sum += blackKnightBoard[i];
+                break;
+
+            case 'b':
+                sum += blackBishopBoard[i];
+                break;
+
+            case 'r':
+                sum += blackRookBoard[i];
+                break;
+
+            case 'q':
+                sum += blackQueenBoard[i];
+                break;
+
+            case 'k':
+                sum += blackKingBoard[i];
+                break;
+            
+            default:
+                break;
+        }
+
+    } 
+
+    // std::cout<< "board value is " << std::to_string(sum) << std::endl; 
+
+    return sum;
 
 }
 
