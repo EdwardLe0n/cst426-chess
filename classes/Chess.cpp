@@ -720,6 +720,8 @@ void Chess::printBitboard(uint64_t some_board) {
 
 void Chess::updateAI() {
 
+    _lastAIMove = BitMove(); // Reset last AI move (add this at the top of updateAI())
+
     const auto searchStart = std::chrono::steady_clock::now();
     
     negamaxCalls = 0;
@@ -756,6 +758,8 @@ void Chess::updateAI() {
     std::cout << "total negamax calls : " << negamaxCalls << std::endl;
 
     if (bestMove != -100000) {
+
+        _lastAIMove = bestSquare;
 
         const double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - searchStart).count();
         const double boardsPerSecond = seconds > 0.0 ? static_cast<double>(negamaxCalls) / seconds : 0.0;
@@ -916,4 +920,93 @@ std::vector<BitMove> Chess::generateAllMoves() {
 
     return moveList;
 
+}
+
+// Tournament support: Set board from FEN and reinitialize game state for AI
+void Chess::setBoardFromFEN(const std::string& fen) {
+ // Parse FEN string - can be full FEN or just piece placement
+std::string piecePlacement = fen;
+std::string activeColor = "w";
+std::string castling = "KQkq";
+std::string enPassant = "-";
+ // Check if this is a full FEN string (has spaces)
+size_t spacePos = fen.find(' ');
+if (spacePos != std::string::npos) {
+ // Parse full FEN
+std::istringstream fenStream(fen);
+ fenStream >> piecePlacement >> activeColor >> castling >> enPassant;
+ }
+ // Set visual board from piece placement
+FENtoBoard(piecePlacement);
+ // Determine current player from FEN
+ _currentPlayer = (activeColor == "w" || activeColor == "W") ? WHITE : BLACK;
+ // Reinitialize game state so AI sees correct board
+
+GameState _gamestate; 
+_gamestate.init(stateString().c_str(), _currentPlayer);
+ // TODO: Parse castling rights and en passant from FEN for more accurate state
+ // For now, the basic state is sufficient for AI to calculate moves
+ // Generate legal moves for the new position
+ moves.clear();
+ moves = _gamestate.generateAllMoves();
+std::cout << "[Tournament] Board set from FEN. Player: "
+ << (_currentPlayer == WHITE ? "White" : "Black")
+ << ", Legal moves: " << moves.size() << std::endl;
+}
+// Tournament support: Generate FEN string from current board
+std::string Chess::getFEN() const {
+std::string fen;
+fen.reserve(90);
+ // Piece placement (from rank 8 to rank 1)
+for (int rank = 7; rank >= 0; --rank) {
+int emptyCount = 0;
+for (int file = 0; file < 8; ++file) {
+char piece = pieceNotation(file, rank);
+if (piece == '0') {
+ emptyCount++;
+ } else {
+if (emptyCount > 0) {
+ fen += std::to_string(emptyCount);
+ emptyCount = 0;
+ }
+ fen += piece;
+ }
+ }
+if (emptyCount > 0) {
+ fen += std::to_string(emptyCount);
+ }
+if (rank > 0) {
+ fen += '/';
+ }
+ }
+ // Active color
+ fen += ' ';
+ fen += (_currentPlayer == WHITE) ? 'w' : 'b';
+ // Castling availability (simplified - always report based on piece positions)
+ fen += ' ';
+std::string castling;
+ // Check if white can castle (king on e1, rooks on a1/h1)
+char e1 = pieceNotation(4, 0);
+char a1 = pieceNotation(0, 0);
+char h1 = pieceNotation(7, 0);
+if (e1 == 'K') {
+if (h1 == 'R') castling += 'K';
+if (a1 == 'R') castling += 'Q';
+ }
+ // Check if black can castle (king on e8, rooks on a8/h8)
+char e8 = pieceNotation(4, 7);
+char a8 = pieceNotation(0, 7);
+char h8 = pieceNotation(7, 7);
+if (e8 == 'k') {
+if (h8 == 'r') castling += 'k';
+if (a8 == 'r') castling += 'q';
+ }
+ fen += castling.empty() ? "-" : castling;
+ // En passant target square (simplified - report as '-')
+ fen += " -";
+ // Halfmove clock (simplified)
+ fen += " 0";
+ // Fullmove number (simplified)
+ fen += " 1";
+return fen;
 }

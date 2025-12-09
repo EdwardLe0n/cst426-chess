@@ -205,6 +205,15 @@ public:
     uint64_t whiteOccupancy();
     uint64_t blackOccupancy();
 
+    // Tournament support methods
+    void setBoardFromFEN(const std::string& fen);
+    BitMove getLastAIMove() const { return _lastAIMove; }
+    std::string getFEN() const;
+    // Get current player color (WHITE=1, BLACK=-1)
+    int getCurrentPlayerColor() const { return _currentPlayer; }
+    // you can make this variable private, it's just grouped with the public methods for convenience
+    BitMove _lastAIMove; // Stores the last move calculated by AI (for tournament)
+
 private:
     Bit* PieceForPlayer(const int playerNumber, ChessPiece piece);
     Player* ownerAt(int x, int y) const;
@@ -229,4 +238,9 @@ private:
 
     int negamaxCalls;
     
+    int _currentPlayer;
+    int _aiPlayer;
+
+    // GameState _gamestate;
+
 };
